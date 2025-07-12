@@ -24,7 +24,7 @@ body {
 }
 
 .active-nav-bar-btn {
-  @apply bg-primary text-primary-content hover:bg-primary/70;
+  @apply bg-primary text-primary-content hover:bg-primary/70 shadow-md shadow-black;
 }
 
 input[type="search"]::-webkit-search-cancel-button {

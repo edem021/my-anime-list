@@ -21,7 +21,7 @@ const Header = () => {
           onChange={(e) => setSearchItem(e.target.value)}
           className="rounded-md focus:outline-0 flex-1 pr-2"
         />
-        <FaSearch color="white" size={18} className="cursor-pointer" />
+        <FaSearch size={18} className="cursor-pointer text-neutral-content" />
       </div>
       <div>
         <Link to="/login" className="login-btn">
