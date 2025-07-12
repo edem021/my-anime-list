@@ -1,0 +1,40 @@
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes: all;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.header {
+  @apply h-20 bg-base-200 shadow-black shadow px-6 sticky top-0 flex justify-between items-center;
+}
+
+.login-btn {
+  @apply border rounded-md px-4 py-1 bg-primary text-primary-content font-semibold text-lg uppercase tracking-wide;
+}
+
+.nav-bar {
+  @apply fixed w-60 m-2 p-3 flex flex-col bg-base-200 h-screen border-neutral-700 rounded-sm shadow-md shadow-black;
+}
+
+.nav-bar-btn {
+  @apply rounded-xs px-2 py-1 font-semibold cursor-pointer shadow-xs shadow-black transition-all duration-300 flex items-center gap-2;
+}
+
+.active-nav-bar-btn {
+  @apply bg-primary text-primary-content hover:bg-primary/70;
+}
+
+input[type="search"]::-webkit-search-cancel-button {
+  display: none;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: inherit;
+}
