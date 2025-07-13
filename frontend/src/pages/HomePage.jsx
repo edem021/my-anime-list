@@ -2,10 +2,13 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import Loading from "../components/Loading.jsx";
 import { getTrendingAnimes } from "../services/api.js";
+import { FaChevronLeft } from "react-icons/fa6";
+import { FaChevronRight } from "react-icons/fa6";
 
 const HomePage = () => {
   const [trendingAnimes, setTrendingAnimes] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [currentTrendingAnime, setCurrentTrendingAnime] = useState({});
 
   useEffect(() => {
     const fetchTrendingAnimes = async () => {
@@ -29,16 +32,37 @@ const HomePage = () => {
     fetchTrendingAnimes();
   }, []);
 
+  useEffect(() => {
+    if (trendingAnimes.length > 0) {
+      setCurrentTrendingAnime(trendingAnimes[2]);
+    }
+  }, [trendingAnimes]);
+
   return (
-    <div>
+    <>
       {loading && <Loading />}
-      {trendingAnimes.map((anime) => (
-        <div key={anime.mal_id}>
-          <h2>{anime.title}</h2>
-          <img src={anime.images.jpg.image_url} alt="image" />
+      <div className="flex h-150" style={{width: "calc(100vw - 18rem)"}}>
+        <div className="w-[75%] flex items-center px-5">
+          <h2 className="text-primary text-3xl font-semibold text-shadow-md text-shadow-black">
+            {currentTrendingAnime.title}
+          </h2>
         </div>
-      ))}
-    </div>
+        <div className="flex gap-15 justify-center items-center overflow-hidden">
+          {trendingAnimes.map((anime) => (
+            <img
+              src={anime.images.jpg.image_url}
+              alt={anime.title}
+              key={anime.mal_id}
+              className={`rounded-lg shadow-lg shadow-black ${
+                anime.mal_id === currentTrendingAnime.mal_id
+                  ? "scale-130"
+                  : "scale-100"
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+    </>
   );
 };
 
