@@ -1,32 +1,38 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import Loading from "../components/Loading.jsx";
+import { getTrendingAnimes } from "../services/api.js";
 
 const HomePage = () => {
-  const [scheduleAnimes, setScheduleAnimes] = useState([]);
+  const [trendingAnimes, setTrendingAnimes] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchScheduleAnimes = async () => {
-      setLoading(true);
+    const fetchTrendingAnimes = async () => {
       try {
-        const res = await fetch("https://api.jikan.moe/v4/schedules");
-        if (!res.ok) throw new Error("Failed to fetch animes");
-        const data = await res.json();
-        setScheduleAnimes(data.data);
+        const trendingAnimes = await getTrendingAnimes();
+        const uniqueTrendingAnimes = [];
+        const seen = new Set();
+
+        for (const anime of trendingAnimes) {
+          if (!seen.has(anime.mal_id)) {
+            seen.add(anime.mal_id);
+            uniqueTrendingAnimes.push(anime);
+          }
+        }
+
+        setTrendingAnimes(uniqueTrendingAnimes);
       } catch (error) {
-        toast.error("Error loading animes");
-      } finally {
-        setLoading(false);
+        toast.error("Error loading trending animes");
       }
     };
-    fetchScheduleAnimes();
+    fetchTrendingAnimes();
   }, []);
 
   return (
     <div>
       {loading && <Loading />}
-      {scheduleAnimes.map((anime) => (
+      {trendingAnimes.map((anime) => (
         <div key={anime.mal_id}>
           <h2>{anime.title}</h2>
           <img src={anime.images.jpg.image_url} alt="image" />
