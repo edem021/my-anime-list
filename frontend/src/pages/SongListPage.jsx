@@ -1,9 +1,16 @@
-import React from 'react'
-
 const SongListPage = () => {
   return (
-    <div>SongListPage</div>
-  )
-}
+    <div
+      className="flex flex-col gap-10 px-5 py-10"
+      style={{ width: "calc(100vw - 18rem)" }}
+    ></div>
+  );
+};
 
-export default SongListPage
+export default SongListPage;
+
+/* 
+  animes
+  vtubers
+  artists
+*/

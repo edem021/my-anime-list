@@ -41,25 +41,29 @@ const HomePage = () => {
   return (
     <>
       {loading && <Loading />}
-      <div className="flex h-150" style={{width: "calc(100vw - 18rem)"}}>
-        <div className="w-[75%] flex items-center px-5">
-          <h2 className="text-primary text-3xl font-semibold text-shadow-md text-shadow-black">
-            {currentTrendingAnime.title}
-          </h2>
+      <div
+        className="flex flex-col gap-10 px-5 py-10"
+        style={{ width: "calc(100vw - 18rem)" }}
+      >
+        <div className="flex flex-col border-t border-neutral-800 py-5">
+          <h2 className="text-3xl">Current Trending Animes</h2>
+          <div className="flex gap-15 h-110 justify-center items-center overflow-hidden">
+            {trendingAnimes.map((anime) => (
+              <img
+                src={anime.images.jpg.image_url}
+                alt={anime.title}
+                key={anime.mal_id}
+                className={`rounded-lg shadow-lg shadow-black ${
+                  anime.mal_id === currentTrendingAnime.mal_id
+                    ? "scale-120"
+                    : "scale-100"
+                }`}
+              />
+            ))}
+          </div>
         </div>
-        <div className="flex gap-15 justify-center items-center overflow-hidden">
-          {trendingAnimes.map((anime) => (
-            <img
-              src={anime.images.jpg.image_url}
-              alt={anime.title}
-              key={anime.mal_id}
-              className={`rounded-lg shadow-lg shadow-black ${
-                anime.mal_id === currentTrendingAnime.mal_id
-                  ? "scale-130"
-                  : "scale-100"
-              }`}
-            />
-          ))}
+        <div className="flex items-center border-b h-80 border-neutral-800">
+          <h2 className="text-2xl">{currentTrendingAnime.title}</h2>
         </div>
       </div>
     </>
