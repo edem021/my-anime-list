@@ -9,7 +9,7 @@ html, body {
 }
 
 .header {
-  @apply z-100 h-20 bg-base-200 shadow-black shadow px-6 sticky top-0 flex justify-between items-center;
+  @apply z-50 h-20 bg-base-200 shadow-black shadow px-6 sticky top-0 flex justify-between items-center;
 }
 
 .login-btn {
@@ -21,14 +21,16 @@ html, body {
 }
 
 .nav-bar-btn {
-  @apply rounded-xs px-2 py-1 font-semibold cursor-pointer shadow-xs shadow-black transition-all duration-300 flex items-center gap-2;
+  @apply rounded-xs px-2 py-1 font-semibold cursor-pointer shadow-xs shadow-black transition-all duration-300 flex items-center gap-2 select-none;
 }
 
 .active-nav-bar-btn {
   @apply bg-primary text-primary-content shadow-md shadow-black;
 }
 
-
+.song-list-dropdown {
+  @apply flex items-center italic
+}
 
 h2 {
   @apply text-primary font-semibold text-shadow-md text-shadow-black;

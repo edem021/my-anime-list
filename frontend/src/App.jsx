@@ -8,16 +8,32 @@ import LoginPage from "./pages/LoginPage.jsx";
 import SideMenu from "./components/SideMenu.jsx";
 import SchedulePage from "./pages/SchedulePage.jsx";
 import LatestEpisodesPage from "./pages/LatestEpisodesPage.jsx";
-import SongListPage from "./pages/SongListPage.jsx";
+import AnimeSongsPage from "./pages/AnimeArtistsPage.jsx";
+import VtubersPage from "./pages/VtubersPage.jsx";
+import ArtistSongsPage from "./pages/ArtistsPage.jsx";
+import VtuberSongsPage from "./pages/VtuberSongsPage.jsx";
+import Particles from "./components/Particles.jsx";
 
 function App() {
   const location = useLocation();
 
   return (
-    <div data-theme="sunset" className="min-h-screen w-full bg-base-300">
+    <div data-theme="sunset" className="min-h-screen w-full bg-base-300 relative">
+        <div className="absolute inset-0 z-0" style={{clipPath: "inset(80px 0 0 0)"}}>
+          <Particles
+            particleColors={["#ffffff", "#ffffff"]}
+            particleCount={1000}
+            particleSpread={20}
+            speed={0.2}
+            particleBaseSize={100}
+            moveParticlesOnHover={true}
+            alphaParticles={true}
+            disableRotation={true}
+          />
+        </div>
       <Header />
       <SideMenu />
-      <main className="ml-64 p-2 min-h-screen rounded-sm flex flex-col justify-between">
+      <main className="ml-64 p-2 min-h-screen rounded-sm flex flex-col justify-between relative overflow-hidden">
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
             <Route
@@ -53,10 +69,34 @@ function App() {
               }
             />
             <Route
-              path="/song-list"
+              path="/anime"
               element={
                 <PageTransition>
-                  <SongListPage />
+                  <AnimeSongsPage />
+                </PageTransition>
+              }
+            />
+            <Route
+              path="/vtuber"
+              element={
+                <PageTransition>
+                  <VtubersPage />
+                </PageTransition>
+              }
+            />
+            <Route
+              path="/artist"
+              element={
+                <PageTransition>
+                  <ArtistSongsPage />
+                </PageTransition>
+              }
+            />
+            <Route
+              path="/vtuber/:id"
+              element={
+                <PageTransition>
+                  <VtuberSongsPage />
                 </PageTransition>
               }
             />

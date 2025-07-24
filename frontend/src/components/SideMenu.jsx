@@ -1,93 +1,119 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, matchPath } from "react-router-dom";
 import { BiSolidHome } from "react-icons/bi";
 import { FaCalendarDays } from "react-icons/fa6";
 import { FaClock } from "react-icons/fa";
 import { FaMusic } from "react-icons/fa";
+import SongListDropdown from "./SongListDropdown";
+import { AnimatePresence } from "framer-motion";
 
 const SideMenu = () => {
   const [active, setActive] = useState("");
+  const [songListOpen, setSongListOpen] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
-    setActive(pathToActive[location.pathname] || "home");
+    let found = "home";
+    for (const path in pathToActive) {
+      if (matchPath({ path, end: true }, location.pathname)) {
+        found = pathToActive[path];
+        break;
+      }
+    }
+    setActive(found);
   }, [location.pathname]);
 
   const pathToActive = {
     "/": "home",
     "/schedule": "schedule",
     "/latest-episodes": "latest-episodes",
-    "/song-list": "song-list",
+    "/anime": "song-list",
+    "/vtuber": "song-list",
+    "/artist": "song-list",
+    "/vtuber/:id": "song-list",
   };
 
   return (
     <nav className="nav-bar" style={{ height: "calc(100vh - 6rem)" }}>
       <ul className="flex flex-col gap-3">
         <li>
-          <Link
-            to="/"
-            className={`nav-bar-btn group ${
-              active === "home" && "active-nav-bar-btn"
-            }`}
-          >
+          <Link to="/" className="nav-bar-btn group">
             <BiSolidHome size={20} />
-            <p className="group-hover:translate-x-1.5 transition-all duration-200 relative">
+            <p
+              className={`group-hover:translate-x-1.5 transition-all duration-200 relative ${
+                active === "home" && "translate-x-1.5"
+              }`}
+            >
               Home
-              <span className="absolute bottom-0 left-0 w-full h-0.5 transition-all duration-200 group-hover:bg-primary" />
+              {active === "home" ? (
+                <span className="absolute bottom-0 left-0 w-full h-0.5 transition-all duration-200 bg-base-content" />
+              ) : (
+                <span className="absolute bottom-0 left-0 w-full h-0.5 transition-all duration-200 group-hover:bg-base-content" />
+              )}
             </p>
           </Link>
         </li>
 
         <li>
-          <Link
-            to="/schedule"
-            className={`nav-bar-btn group ${
-              active === "schedule" && "active-nav-bar-btn"
-            }`}
-          >
+          <Link to="/schedule" className="nav-bar-btn group">
             <FaCalendarDays size={20} />
-            <p className="group-hover:translate-x-1.5 transition-all duration-200 relative">
+            <p
+              className={`group-hover:translate-x-1.5 transition-all duration-200 relative ${
+                active === "schedule" && "translate-x-1.5"
+              }`}
+            >
               Schedule
-              <span className="absolute bottom-0 left-0 w-full h-0.5 transition-all duration-200 group-hover:bg-primary" />
+              {active === "schedule" ? (
+                <span className="absolute bottom-0 left-0 w-full h-0.5 transition-all duration-200 bg-base-content" />
+              ) : (
+                <span className="absolute bottom-0 left-0 w-full h-0.5 transition-all duration-200 group-hover:bg-base-content" />
+              )}
             </p>
           </Link>
         </li>
 
         <li>
-          <Link
-            to="/latest-episodes"
-            className={`nav-bar-btn group ${
-              active === "latest-episodes" && "active-nav-bar-btn"
-            }`}
-          >
+          <Link to="/latest-episodes" className="nav-bar-btn group">
             <FaClock size={20} />
-            <p className="group-hover:translate-x-1.5 transition-all duration-200 relative">
+            <p
+              className={`group-hover:translate-x-1.5 transition-all duration-200 relative ${
+                active === "latest-episodes" && "translate-x-1.5"
+              }`}
+            >
               Latest Episodes
-              <span className="absolute bottom-0 left-0 w-full h-0.5 transition-all duration-200 group-hover:bg-primary" />
+              {active === "latest-episodes" ? (
+                <span className="absolute bottom-0 left-0 w-full h-0.5 transition-all duration-200 bg-base-content" />
+              ) : (
+                <span className="absolute bottom-0 left-0 w-full h-0.5 transition-all duration-200 group-hover:bg-base-content" />
+              )}
             </p>
           </Link>
         </li>
 
         <div>
-          <li>
-            <Link
-              to="/song-list"
-              className={`nav-bar-btn group ${
-                active === "song-list" && "active-nav-bar-btn"
+          <li
+            className="nav-bar-btn group"
+            onClick={() => setSongListOpen(!songListOpen)}
+          >
+            <FaMusic size={20} />
+            <p
+              className={`group-hover:translate-x-1.5 transition-all duration-200 relative ${
+                active === "song-list" && "translate-x-1.5"
               }`}
             >
-              <FaMusic size={20} />
-              <p className="group-hover:translate-x-1.5 transition-all duration-200 relative">
-                Song List
-                <span className="absolute bottom-0 left-0 w-full h-0.5 transition-all duration-200 group-hover:bg-primary" />
-              </p>
-            </Link>
+              Song List
+              {active === "song-list" ? (
+                <span className="absolute bottom-0 left-0 w-full h-0.5 transition-all duration-200 bg-base-content" />
+              ) : (
+                <span className="absolute bottom-0 left-0 w-full h-0.5 transition-all duration-200 group-hover:bg-base-content" />
+              )}
+            </p>
           </li>
-          <div className={`border space-y-3 ${active === "song-list" && "bg-red-500"}`}>
-            <p></p>
-            <p></p>
-            <p></p>
-          </div>
+          <AnimatePresence>
+            {songListOpen && (
+              <SongListDropdown setSongListOpen={setSongListOpen} />
+            )}
+          </AnimatePresence>
         </div>
       </ul>
     </nav>
