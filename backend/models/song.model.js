@@ -52,6 +52,14 @@ const songSchema = new Schema(
     relatedArtists: {
       type: [String],
     },
+    lyrics: {
+      type: [String],
+      required: [true, "Lyrics are required"],
+    },
+    originalLyrics: {
+      type: [String],
+      required: [true, "Original lyrics are required"],
+    },
   },
   {
     timestamps: true,

@@ -31,6 +31,7 @@ const SideMenu = () => {
     "/vtuber": "song-list",
     "/artist": "song-list",
     "/vtuber/:id": "song-list",
+    "/vtuber/:id/song/:songId": "song-list",
   };
 
   return (
@@ -40,15 +41,15 @@ const SideMenu = () => {
           <Link to="/" className="nav-bar-btn group">
             <BiSolidHome size={20} />
             <p
-              className={`group-hover:translate-x-1.5 transition-all duration-200 relative ${
-                active === "home" && "translate-x-1.5"
+              className={`nav-bar-btn-text ${
+                active === "home" && "translate-x-1.5 text-primary"
               }`}
             >
               Home
               {active === "home" ? (
-                <span className="absolute bottom-0 left-0 w-full h-0.5 transition-all duration-200 bg-base-content" />
+                <span className="active-nav-bar-btn" />
               ) : (
-                <span className="absolute bottom-0 left-0 w-full h-0.5 transition-all duration-200 group-hover:bg-base-content" />
+                <span className="inactive-nav-bar-btn" />
               )}
             </p>
           </Link>
@@ -58,15 +59,15 @@ const SideMenu = () => {
           <Link to="/schedule" className="nav-bar-btn group">
             <FaCalendarDays size={20} />
             <p
-              className={`group-hover:translate-x-1.5 transition-all duration-200 relative ${
-                active === "schedule" && "translate-x-1.5"
+              className={`nav-bar-btn-text ${
+                active === "schedule" && "translate-x-1.5 text-primary"
               }`}
             >
               Schedule
               {active === "schedule" ? (
-                <span className="absolute bottom-0 left-0 w-full h-0.5 transition-all duration-200 bg-base-content" />
+                <span className="active-nav-bar-btn" />
               ) : (
-                <span className="absolute bottom-0 left-0 w-full h-0.5 transition-all duration-200 group-hover:bg-base-content" />
+                <span className="inactive-nav-bar-btn" />
               )}
             </p>
           </Link>
@@ -76,15 +77,15 @@ const SideMenu = () => {
           <Link to="/latest-episodes" className="nav-bar-btn group">
             <FaClock size={20} />
             <p
-              className={`group-hover:translate-x-1.5 transition-all duration-200 relative ${
-                active === "latest-episodes" && "translate-x-1.5"
+              className={`nav-bar-btn-text ${
+                active === "latest-episodes" && "translate-x-1.5 text-primary"
               }`}
             >
               Latest Episodes
               {active === "latest-episodes" ? (
-                <span className="absolute bottom-0 left-0 w-full h-0.5 transition-all duration-200 bg-base-content" />
+                <span className="active-nav-bar-btn" />
               ) : (
-                <span className="absolute bottom-0 left-0 w-full h-0.5 transition-all duration-200 group-hover:bg-base-content" />
+                <span className="inactive-nav-bar-btn" />
               )}
             </p>
           </Link>
@@ -97,15 +98,15 @@ const SideMenu = () => {
           >
             <FaMusic size={20} />
             <p
-              className={`group-hover:translate-x-1.5 transition-all duration-200 relative ${
-                active === "song-list" && "translate-x-1.5"
+              className={`nav-bar-btn-text ${
+                active === "song-list" && "translate-x-1.5 text-primary"
               }`}
             >
               Song List
               {active === "song-list" ? (
-                <span className="absolute bottom-0 left-0 w-full h-0.5 transition-all duration-200 bg-base-content" />
+                <span className="active-nav-bar-btn" />
               ) : (
-                <span className="absolute bottom-0 left-0 w-full h-0.5 transition-all duration-200 group-hover:bg-base-content" />
+                <span className="inactive-nav-bar-btn" />
               )}
             </p>
           </li>

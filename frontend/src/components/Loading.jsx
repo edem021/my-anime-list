@@ -6,7 +6,7 @@ const Loading = () => {
   const loadingRef = useRef();
 
   return (
-    <div className="w-10">
+    <div className="w-25">
       <Lottie
         onComplete={() => {
           loadingRef.current?.setDirection(-1);

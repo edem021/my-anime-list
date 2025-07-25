@@ -14,7 +14,7 @@ const SongListDropdown = ({ setSongListOpen }) => {
       <div className="hover:translate-x-1.5 transition-transform duration-200 group">
         <Link to="/anime" onClick={() => setSongListOpen(false)}>
           <p className="song-list-dropdown">
-            <MdArrowRight size={22} className="group-hover:text-white" />
+            <MdArrowRight size={22} className="group-hover:text-primary" />
             Animes
           </p>
         </Link>
@@ -22,7 +22,7 @@ const SongListDropdown = ({ setSongListOpen }) => {
       <div className="hover:translate-x-1.5 transition-transform duration-200 group">
         <Link to="/vtuber" onClick={() => setSongListOpen(false)}>
           <p className="song-list-dropdown">
-            <MdArrowRight size={22} className="group-hover:text-white" />
+            <MdArrowRight size={22} className="group-hover:text-primary" />
             Vtubers
           </p>
         </Link>
@@ -30,7 +30,7 @@ const SongListDropdown = ({ setSongListOpen }) => {
       <div className="hover:translate-x-1.5 transition-transform duration-200 group">
         <Link to="/artist" onClick={() => setSongListOpen(false)}>
           <p className="song-list-dropdown">
-            <MdArrowRight size={22} className="group-hover:text-white" />
+            <MdArrowRight size={22} className="group-hover:text-primary" />
             Artists
           </p>
         </Link>

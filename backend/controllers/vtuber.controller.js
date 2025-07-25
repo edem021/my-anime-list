@@ -80,7 +80,7 @@ export const getSongByIdForVtuber = async (req, res) => {
     if (!vtuber) {
       return res.status(404).json({ message: "Vtuber not found" });
     }
-    const song = vtuber.songs.id(req.params.songId);
+    const song = await Song.findById(req.params.songId).populate("vtuber");
     if (!song) {
       return res.status(404).json({ message: "Song not found" });
     }
