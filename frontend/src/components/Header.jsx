@@ -25,11 +25,18 @@ const Header = () => {
         />
         <FaSearch size={18} className="cursor-pointer text-neutral-content" />
       </div>
-      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-        <Link to="/login" className="login-btn">
-          Login
-        </Link>
-      </motion.div>
+      <div className="flex gap-4">
+        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <Link to="/login" className="login-btn">
+            Create
+          </Link>
+        </motion.div>
+        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <Link to="/login" className="login-btn">
+            Login
+          </Link>
+        </motion.div>
+      </div>
     </header>
   );
 };

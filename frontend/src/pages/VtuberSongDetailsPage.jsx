@@ -1,8 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useParams } from "react-router-dom";
 import Loading from "../components/Loading.jsx";
 import { toast } from "sonner";
 import SongDetail from "../components/songDetail.jsx";
+import { TracingBeam } from "../components/ui/TracingBeam.jsx";
+import Lyrics from "../components/Lyrics.jsx";
+import LyricsSelection from "../components/LyricsSelection.jsx";
+import YoutubeContainer from "../components/YoutubeContainer.jsx";
 
 const VtuberSongDetailsPage = () => {
   const [song, setSong] = useState({});
@@ -10,6 +14,7 @@ const VtuberSongDetailsPage = () => {
   const { songId, id } = useParams();
   const [embedUrl, setEmbedUrl] = useState(null);
   const [activeLyrics, setActiveLyrics] = useState("lyrics");
+  const lyricsContainerRef = useRef(null);
 
   useEffect(() => {
     const fetchSong = async () => {
@@ -20,6 +25,7 @@ const VtuberSongDetailsPage = () => {
         );
         if (!res.ok) throw new Error("Failed to fetch song");
         const data = await res.json();
+        console.log("Fetched song data:", data);
         setSong(data);
       } catch (error) {
         console.error("Error fetching song:", error);
@@ -34,9 +40,11 @@ const VtuberSongDetailsPage = () => {
   useEffect(() => {
     if (song && song.lyrics) {
       const getYouTubeEmbedUrl = (url) => {
+        console.log("Processing video URL:", url);
         const videoIdMatch = url.match(
           /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
         );
+        console.log("Video ID Match:", videoIdMatch);
         const videoId = videoIdMatch[1];
         return `https://www.youtube.com/embed/${videoId}`;
       };
@@ -45,6 +53,82 @@ const VtuberSongDetailsPage = () => {
       setEmbedUrl(embed);
     }
   }, [song]);
+
+  useEffect(() => {
+    if (!song.lyrics || !embedUrl || !song.timestamps) {
+      console.log("Missing data:", {
+        lyrics: song.lyrics,
+        embedUrl,
+        timestamps: song.timestamps,
+      });
+      return;
+    }
+
+    const tag = document.createElement("script");
+    tag.src = "https://www.youtube.com/iframe_api";
+    const firstScriptTag = document.getElementsByTagName("script")[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    let player, intervalId;
+    window.onYouTubeIframeAPIReady = () => {
+      player = new YT.Player("youtube-player", {
+        events: {
+          onReady: (event) => {
+            intervalId = setInterval(() => {
+              if (!lyricsContainerRef.current) {
+                console.log("Ref is null");
+                return;
+              }
+              const currentTime = event.target.getCurrentTime();
+              const lastTimestamp = song.timestamps[song.timestamps.length - 1];
+              console.log(
+                "Current Time:",
+                currentTime,
+                "Last Timestamp:",
+                lastTimestamp
+              );
+              if (currentTime >= lastTimestamp) {
+                lyricsContainerRef.current.scrollTo({
+                  top: lyricsContainerRef.current.scrollHeight,
+                  behavior: "smooth",
+                });
+              } else {
+                const currentIndex = song.timestamps.findIndex(
+                  (time) => currentTime >= time
+                );
+                if (currentIndex !== -1) {
+                  const nextLineIndex = currentIndex + 1;
+                  if (nextLineIndex < song.lyrics.length) {
+                    const nextLineElement =
+                      lyricsContainerRef.current.querySelector(
+                        `[data-line-index="${nextLineIndex}"]`
+                      );
+                    if (nextLineElement) {
+                      nextLineElement.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                      });
+                    } else {
+                      console.log(
+                        "Next line element not found for index:",
+                        nextLineIndex
+                      );
+                    }
+                  }
+                }
+              }
+            }, 100);
+          },
+        },
+      });
+    };
+
+    return () => {
+      window.onYouTubeIframeAPIReady = null;
+      if (intervalId) clearInterval(intervalId);
+      if (player) player.destroy();
+    };
+  }, [song, embedUrl]);
 
   return (
     <div
@@ -63,188 +147,37 @@ const VtuberSongDetailsPage = () => {
               >
                 <SongDetail song={song} />
 
-                <div className="flex items-center bg-base-100 w-full h-12 rounded-md shadow-sm shadow-black">
-                  <div className="flex items-center h-full">
-                    <div
-                      className="h-full flex items-center px-4 rounded-md cursor-pointer hover:bg-base-200 transition-colors duration-200"
-                      onClick={() => setActiveLyrics("lyrics")}
-                    >
-                      <h2>Lyrics</h2>
-                    </div>
-                    <div
-                      className=" h-full flex items-center px-4 rounded-md cursor-pointer hover:bg-base-200 transition-colors duration-200"
-                      onClick={() => setActiveLyrics("original")}
-                    >
-                      <h2>Original</h2>
-                    </div>
-                    <div
-                      className=" h-full flex items-center px-4 rounded-md cursor-pointer hover:bg-base-200 transition-colors duration-200"
-                      onClick={() => setActiveLyrics("side-by-side")}
-                    >
-                      <h2>Side by side</h2>
-                    </div>
-                  </div>
-                </div>
+                <LyricsSelection setActiveLyrics={setActiveLyrics} />
 
                 {activeLyrics === "lyrics" ? (
-                  <div className="flex flex-col gap-2 border-r-2">
-                    {(() => {
-                      const lyrics = [];
-                      let lineNumber = 0;
-                      for (const [index, line] of song.lyrics.entries()) {
-                        if (line.trim() !== "") {
-                          lineNumber++;
-                          lyrics.push(
-                            <div
-                              key={`line-${index}`}
-                              className="flex items-center gap-2 h-10 hover:bg-base-200/70 transition-colors duration-200 select-none pl-1 rounded tracking-wider"
-                            >
-                              <span>{lineNumber}.</span>
-                              <span className="flex items-center text-lg">
-                                {line}
-                              </span>
-                            </div>
-                          );
-                        } else {
-                          lyrics.push(
-                            <div
-                              key={`empty-${index}`}
-                              className="flex items-center gap-2 h-10"
-                            >
-                              <span></span>
-                              <span className="flex items-center text-lg"></span>
-                            </div>
-                          );
-                        }
-                      }
-                      return lyrics;
-                    })()}
-                  </div>
+                  <TracingBeam>
+                    <div ref={lyricsContainerRef}>
+                      <Lyrics song={song} lyricsType="lyrics" />
+                    </div>
+                  </TracingBeam>
                 ) : activeLyrics === "original" ? (
-                  <div className="flex flex-col gap-2 border-r-2">
-                    {(() => {
-                      const lyrics = [];
-                      let lineNumber = 0;
-                      for (const [
-                        index,
-                        line,
-                      ] of song.originalLyrics.entries()) {
-                        if (line.trim() !== "") {
-                          lineNumber++;
-                          lyrics.push(
-                            <div
-                              key={`line-${index}`}
-                              className="flex items-center gap-2 h-10 hover:bg-base-200/70 transition-colors duration-200 select-none pl-1 rounded tracking-wider"
-                            >
-                              <span>{lineNumber}.</span>
-                              <span className="flex items-center text-lg">
-                                {line}
-                              </span>
-                            </div>
-                          );
-                        } else {
-                          lyrics.push(
-                            <div
-                              key={`empty-${index}`}
-                              className="flex items-center gap-2 h-10"
-                            >
-                              <span></span>
-                              <span className="flex items-center text-lg"></span>
-                            </div>
-                          );
-                        }
-                      }
-                      return lyrics;
-                    })()}
-                  </div>
+                  <TracingBeam>
+                    <Lyrics song={song} lyricsType="originalLyrics" />
+                  </TracingBeam>
                 ) : (
                   activeLyrics === "side-by-side" && (
-                    <div className="flex justify-between gap-5 border-r-2">
-                      <div className="flex flex-col gap-2">
-                        {(() => {
-                          const lyrics = [];
-                          let lineNumber = 0;
-                          for (const [index, line] of song.lyrics.entries()) {
-                            if (line.trim() !== "") {
-                              lineNumber++;
-                              lyrics.push(
-                                <div
-                                  key={`line-${index}`}
-                                  className="flex items-center gap-2 h-10 hover:bg-base-200/70 transition-colors duration-200 select-none pl-1 rounded tracking-wider"
-                                >
-                                  <span>{lineNumber}.</span>
-                                  <span className="flex items-center text-lg">
-                                    {line}
-                                  </span>
-                                </div>
-                              );
-                            } else {
-                              lyrics.push(
-                                <div
-                                  key={`empty-${index}`}
-                                  className="flex items-center gap-2 h-10"
-                                >
-                                  <span></span>
-                                  <span className="flex items-center text-lg"></span>
-                                </div>
-                              );
-                            }
-                          }
-                          return lyrics;
-                        })()}
+                    <TracingBeam>
+                      <div className="flex gap-50">
+                        <Lyrics song={song} lyricsType="lyrics" />
+                        <Lyrics song={song} lyricsType="originalLyrics" />
                       </div>
-
-                      <div className="flex flex-col gap-2 pr-40">
-                        {(() => {
-                          const lyrics = [];
-                          let lineNumber = 0;
-                          for (const [index, line] of song.originalLyrics.entries()) {
-                            if (line.trim() !== "") {
-                              lineNumber++;
-                              lyrics.push(
-                                <div
-                                  key={`line-${index}`}
-                                  className="flex items-center gap-2 h-10 hover:bg-base-200/70 transition-colors duration-200 select-none pl-1 rounded tracking-wider"
-                                >
-                                  <span>{lineNumber}.</span>
-                                  <span className="flex items-center text-lg">
-                                    {line}
-                                  </span>
-                                </div>
-                              );
-                            } else {
-                              lyrics.push(
-                                <div
-                                  key={`empty-${index}`}
-                                  className="flex items-center gap-2 h-10"
-                                >
-                                  <span></span>
-                                  <span className="flex items-center text-lg"></span>
-                                </div>
-                              );
-                            }
-                          }
-                          return lyrics;
-                        })()}
-                      </div>
-                    </div>
+                    </TracingBeam>
                   )
                 )}
               </div>
 
               <div className="fixed right-0 top-24 w-130 p-8">
                 {embedUrl && (
-                  <div className="w-full h-78.75">
-                    <iframe
-                      width="100%"
-                      height="100%"
-                      src={embedUrl}
-                      title={song.title}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      className="rounded-lg shadow-md shadow-black"
-                    ></iframe>
-                  </div>
+                  <YoutubeContainer
+                    embedUrl={embedUrl}
+                    songTitle={song.title}
+                    id="youtube-player"
+                  />
                 )}
               </div>
             </div>

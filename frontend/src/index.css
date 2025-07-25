@@ -13,7 +13,7 @@ html, body {
 }
 
 .login-btn {
-  @apply ring ring-base-content rounded-md px-4 py-1 bg-primary text-primary-content font-semibold text-lg uppercase tracking-wide;
+  @apply rounded-md px-4 py-1 bg-gradient-to-r from-primary to-secondary text-primary-content font-semibold text-lg uppercase tracking-wide;
 }
 
 .nav-bar {
