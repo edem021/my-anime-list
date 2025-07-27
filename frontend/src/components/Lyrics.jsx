@@ -1,19 +1,6 @@
-const Lyrics = ({ song, lyricsType, currentTargetLine }) => {
+const Lyrics = ({ song, lyricsType }) => {
   return (
     <div className="flex flex-col gap-2 relative">
-      {currentTargetLine && (
-        <div
-          id="scroll-anchor"
-          style={{
-            position: "absolute",
-            top: "80px",
-            transform: `translateY(calc(${
-              currentTargetLine - 1
-            } * (100% + 8px)))`,
-          }}
-          aria-hidden="true"
-        />
-      )}
       {(() => {
         const lyrics = [];
         let lineNumber = 0;
@@ -31,12 +18,7 @@ const Lyrics = ({ song, lyricsType, currentTargetLine }) => {
               </div>
             );
           } else {
-            lyrics.push(
-              <div
-                key={`empty-${index}`}
-                className="flex items-center gap-2 h-10"
-              ></div>
-            );
+            lyrics.push(<span key={`empty-${index}`} className="h-10" />);
           }
         }
         return lyrics;

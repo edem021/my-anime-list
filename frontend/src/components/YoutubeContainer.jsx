@@ -13,6 +13,6 @@ const YoutubeContainer = ({ embedUrl, songTitle, id }) => {
       ></iframe>
     </div>
   );
-}
+};
 
-export default YoutubeContainer
+export default YoutubeContainer;

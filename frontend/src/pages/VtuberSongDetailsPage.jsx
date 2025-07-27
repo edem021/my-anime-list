@@ -7,6 +7,7 @@ import { TracingBeam } from "../components/ui/TracingBeam.jsx";
 import Lyrics from "../components/Lyrics.jsx";
 import LyricsSelection from "../components/LyricsSelection.jsx";
 import YoutubeContainer from "../components/YoutubeContainer.jsx";
+import { youtubeStateChange } from "../utils/youtubeStateChange.js";
 
 const VtuberSongDetailsPage = () => {
   const [song, setSong] = useState({});
@@ -15,7 +16,6 @@ const VtuberSongDetailsPage = () => {
   const [embedUrl, setEmbedUrl] = useState(null);
   const [activeLyrics, setActiveLyrics] = useState("lyrics");
   const lyricsContainerRef = useRef(null);
-  const [currentTargetLine, setCurrentTargetLine] = useState(null);
 
   useEffect(() => {
     const fetchSong = async () => {
@@ -38,111 +38,51 @@ const VtuberSongDetailsPage = () => {
   }, [id, songId]);
 
   useEffect(() => {
-    if (song && song.lyrics && song.timestamps && lyricsContainerRef.current) {
-      const getYouTubeEmbedUrl = (url) => {
-        const videoIdMatch = url.match(
-          /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
-        );
-        const videoId = videoIdMatch[1];
-        return `https://www.youtube.com/embed/${videoId}?enablejsapi=1`;
-      };
+    if (
+      !song ||
+      !song.lyrics ||
+      !song.timestamps ||
+      !lyricsContainerRef.current
+    )
+      return;
 
-      const embed = getYouTubeEmbedUrl(song.videoUrl);
-      setEmbedUrl(embed);
+    const getYouTubeEmbedUrl = (url) => {
+      const videoIdMatch = url.match(
+        /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+      );
+      const videoId = videoIdMatch[1];
+      return `https://www.youtube.com/embed/${videoId}?enablejsapi=1`;
+    };
 
-      const tag = document.createElement("script");
-      tag.src = "https://www.youtube.com/iframe_api";
-      tag.async = true;
-      tag.onload = () => console.log("API script loaded");
-      tag.onerror = () => console.error("Failed to load API script");
-      const firstScriptTag = document.getElementsByTagName("script")[0];
-      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    const embed = getYouTubeEmbedUrl(song.videoUrl);
+    setEmbedUrl(embed);
 
-      let player, intervalId;
+    const tag = document.createElement("script");
+    tag.src = "https://www.youtube.com/iframe_api";
+    const firstScriptTag = document.getElementsByTagName("script")[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-      window.onYouTubeIframeAPIReady = () => {
-        const initializePlayer = () => {
-          try {
-            player = new YT.Player("youtube-player", {
-              events: {
-                onStateChange: (event) => {
-                  const state = event.data;
+    let player, intervalId;
+    window.onYouTubeIframeAPIReady = () => {
+      player = new YT.Player("youtube-player", {
+        events: {
+          onStateChange: (event) =>
+            (intervalId = youtubeStateChange(
+              player,
+              event,
+              song,
+              lyricsContainerRef,
+              intervalId
+            )),
+        },
+      });
+    };
 
-                  if (state === YT.PlayerState.PLAYING && !intervalId) {
-                    intervalId = setInterval(() => {
-                      const currentTime = player.getCurrentTime();
-                      const timestampKeys = Object.keys(song.timestamps).map(
-                        Number
-                      );
-                      const lastTimestamp = Math.max(...timestampKeys);
-
-                      if (currentTime >= lastTimestamp) {
-                        lyricsContainerRef.current.scrollTo({
-                          bottom: lyricsContainerRef.current.scrollHeight,
-                          behavior: "smooth",
-                        });
-                      } else {
-                        let currentIndex = -1;
-
-                        for (let i = 0; i < timestampKeys.length; i++) {
-                          if (timestampKeys[i] <= currentTime) {
-                            currentIndex = i;
-                          } else {
-                            break;
-                          }
-                        }
-
-                        if (currentIndex !== -1) {
-                          const currentTimestamp = timestampKeys[currentIndex];
-                          let nextLineIndex;
-
-                          nextLineIndex = song.timestamps[currentTimestamp];
-                          if (currentIndex < timestampKeys.length - 1) {
-                            const nextTimestamp =
-                              timestampKeys[currentIndex + 1];
-                            if (currentTime >= nextTimestamp - 0.5) {
-                              nextLineIndex = song.timestamps[nextTimestamp];
-                            }
-                          }
-
-                          if (nextLineIndex <= song.lyrics.length) {
-                            setCurrentTargetLine(nextLineIndex);
-                            const anchorElement =
-                              document.querySelector("#scroll-anchor");
-
-                            if (anchorElement) {
-                              anchorElement.scrollIntoView({
-                                behavior: "smooth",
-                              });
-                            }
-                          }
-                        }
-                      }
-                    }, 100);
-                  } else if (
-                    (state === YT.PlayerState.PAUSED || YT.PlayerState.ENDED) &&
-                    intervalId
-                  ) {
-                    clearInterval(intervalId);
-                    intervalId = null;
-                  }
-                },
-                onError: (error) => console.error("Player error: ", error),
-              },
-            });
-          } catch (error) {
-            console.error("Error initializing YT.player: ", error);
-          }
-        };
-        initializePlayer();
-      };
-
-      return () => {
-        window.onYouTubeIframeAPIReady = null;
-        if (intervalId) clearInterval(intervalId);
-        if (player) player.destroy();
-      };
-    }
+    return () => {
+      window.onYouTubeIframeAPIReady = null;
+      if (intervalId) clearInterval(intervalId);
+      if (player) player.destroy();
+    };
   }, [song]);
 
   return (
@@ -167,35 +107,21 @@ const VtuberSongDetailsPage = () => {
                 {activeLyrics === "lyrics" ? (
                   <TracingBeam>
                     <div ref={lyricsContainerRef}>
-                      <Lyrics
-                        song={song}
-                        lyricsType="lyrics"
-                        currentTargetLine={currentTargetLine}
-                      />
+                      <Lyrics song={song} lyricsType="lyrics" />
                     </div>
                   </TracingBeam>
                 ) : activeLyrics === "original" ? (
                   <TracingBeam>
-                    <Lyrics
-                      song={song}
-                      lyricsType="originalLyrics"
-                      currentTargetLine={currentTargetLine}
-                    />
+                    <div ref={lyricsContainerRef}>
+                      <Lyrics song={song} lyricsType="originalLyrics" />
+                    </div>
                   </TracingBeam>
                 ) : (
                   activeLyrics === "side-by-side" && (
                     <TracingBeam>
-                      <div className="flex gap-50">
-                        <Lyrics
-                          song={song}
-                          lyricsType="lyrics"
-                          currentTargetLine={currentTargetLine}
-                        />
-                        <Lyrics
-                          song={song}
-                          lyricsType="originalLyrics"
-                          currentTargetLine={currentTargetLine}
-                        />
+                      <div className="flex gap-50" ref={lyricsContainerRef}>
+                        <Lyrics song={song} lyricsType="lyrics" />
+                        <Lyrics song={song} lyricsType="originalLyrics" />
                       </div>
                     </TracingBeam>
                   )
