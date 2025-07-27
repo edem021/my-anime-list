@@ -61,7 +61,8 @@ const songSchema = new Schema(
       required: [true, "Original lyrics are required"],
     },
     timestamps: {
-      type: [String],
+      type: Map,
+      of: Number,
       required: [true, "Timestamps are required"],
     },
   },
