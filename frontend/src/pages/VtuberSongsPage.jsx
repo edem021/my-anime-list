@@ -1,18 +1,22 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import Loading from "../components/Loading.jsx";
 import { FaYoutube } from "react-icons/fa";
 import { FaSquareXTwitter } from "react-icons/fa6";
 import { MdFavoriteBorder } from "react-icons/md";
+import { IoCaretBack } from "react-icons/io5";
 import { MdFavorite } from "react-icons/md";
 import { motion } from "framer-motion";
+import Colorthief from "colorthief";
 
 const VtuberSongsPage = () => {
   const [vtuber, setVtuber] = useState([]);
   const [loading, setLoading] = useState(false);
   const [favorites, setFavorites] = useState([]);
+  const [colorPalette, setColorPalette] = useState(null);
   const { id } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchVtuber = async () => {
@@ -32,6 +36,34 @@ const VtuberSongsPage = () => {
     fetchVtuber();
   }, [id]);
 
+  useEffect(() => {
+    if (vtuber.profileImage) {
+      const imageUrl = `http://localhost:5000/api/vtuber/proxy-image/${encodeURIComponent(
+        vtuber.profileImage
+      )}`;
+      const img = new Image();
+      img.crossOrigin = "Anonymous";
+      img.src = imageUrl;
+
+      img.onload = () => {
+        try {
+          const colorThief = new Colorthief();
+          const colorPalette = colorThief.getPalette(img, 5);
+          setColorPalette({
+            first: `rgb(${colorPalette[0].join(",")})`,
+            second: `rgb(${colorPalette[1].join(",")})`,
+            third: `rgb(${colorPalette[2].join(",")})`,
+            fourth: `rgb(${colorPalette[3].join(",")})`,
+            fifth: `rgb(${colorPalette[4].join(",")})`,
+          });
+        } catch (error) {
+          console.error("Error extracting color from picture", error);
+          toast.error("Failed to extract profile picture color");
+        }
+      };
+    }
+  }, [vtuber.profileImage]);
+
   const toggleFavorite = async (songId) => {
     setFavorites((prev) => ({
       ...prev,
@@ -48,14 +80,34 @@ const VtuberSongsPage = () => {
         <Loading />
       ) : (
         <div>
-          <div className="flex items-center gap-5">
-            <Link to={vtuber.youtubeChannel} target="_blank">
-              <img
-                src={vtuber.profileImage}
-                alt={vtuber.name}
-                className="w-32 h-32 rounded-full"
-              />
-            </Link>
+          <div className="flex items-center gap-10">
+            {colorPalette && (
+              <div className="rounded-full relative z-100 p-1">
+                <Link to={vtuber.youtubeChannel} target="_blank">
+                  <img
+                    src={vtuber.profileImage}
+                    alt={vtuber.name}
+                    className="w-40 rounded-full"
+                  />
+                  <div
+                    className="absolute -top-[5%] -left-[5%] w-[110%] h-[110%] rounded-full -z-10 animate-conic-rotate"
+                    style={{
+                      background: `conic-gradient(from var(--conic-angle), ${colorPalette.first}, ${colorPalette.third}, ${colorPalette.first}, ${colorPalette.first}, ${colorPalette.third}, ${colorPalette.first})`,
+                      "--glow-color": colorPalette.first,
+                    }}
+                  />
+                </Link>
+                <div
+                  className="absolute -top-[13%] -left-[13%] w-[55%] h-[55%] -z-20 rounded-xl cursor-pointer hover:-translate-1 transition-transform duration-200"
+                  style={{
+                    background: `linear-gradient(120deg, ${colorPalette.first}, ${colorPalette.second})`,
+                    boxShadow: `0 0 6px ${colorPalette.first}`,
+                  }}
+                  onClick={() => navigate(-1)}
+                ></div>
+                <div className="absolute bg-base-300 w-[110%] h-[110%] rounded-full -top-[10%] -left-[10%] -z-20" />
+              </div>
+            )}
             <div className="border-b border-base-content pb-2 flex justify-between w-full z-20">
               <h2 className="text-4xl font-bold">{vtuber.name}</h2>
 
@@ -76,7 +128,7 @@ const VtuberSongsPage = () => {
             </div>
           </div>
 
-          <div className="flex flex-col gap-5 ml-37 select-none">
+          <div className="flex flex-col gap-5 ml-47 select-none">
             {vtuber.songs?.map((song) => (
               <div
                 key={song._id}

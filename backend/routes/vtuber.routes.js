@@ -5,10 +5,12 @@ import {
   getVtuberById,
   updateVtuber,
   deleteVtuber,
+  proxyImage,
   createSongForVtuber,
   getSongByIdForVtuber,
   updateSongForVtuber,
   deleteSongForVtuber,
+  updateProfilePicture,
 } from "../controllers/vtuber.controller.js";
 
 const router = express.Router();
@@ -25,5 +27,8 @@ router.post("/:id/song", createSongForVtuber);
 router.get("/:id/song/:songId", getSongByIdForVtuber);
 router.put("/:id/song/:songId", updateSongForVtuber);
 router.delete("/:id/song/:songId", deleteSongForVtuber);
+
+router.get("/proxy-image/:encodedUrl", proxyImage);
+router.get("/update-profile-picture/:id", updateProfilePicture);
 
 export default router;

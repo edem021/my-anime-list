@@ -3,13 +3,14 @@
   themes: all;
 }
 
-html, body {
+html,
+body {
   font-family: Arial, Helvetica, sans-serif;
   scrollbar-width: none;
 }
 
 .header {
-  @apply z-50 h-20 bg-gradient-to-t from-base-300 to-base-200 shadow-black shadow px-6 sticky top-0 flex justify-between items-center;
+  @apply z-500 h-20 bg-gradient-to-t from-base-300 to-base-200 shadow-black shadow px-6 sticky top-0 flex justify-between items-center;
 }
 
 .login-btn {
@@ -33,11 +34,15 @@ html, body {
 }
 
 .song-list-dropdown {
-  @apply flex items-center italic group-hover:text-primary
+  @apply flex items-center italic group-hover:text-primary;
 }
 
 .nav-bar-btn-text {
   @apply group-hover:translate-x-1.5 transition-all duration-200 relative;
+}
+
+.animate-conic-rotate {
+  animation: 5s conicRotate linear infinite;
 }
 
 h2 {
@@ -54,4 +59,25 @@ input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
   -webkit-background-clip: text;
   -webkit-text-fill-color: inherit;
+}
+
+@property --conic-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes conicRotate {
+  0% {
+    --conic-angle: 0deg;
+    box-shadow: 0 0 15px var(--glow-color);
+  }
+  50% {
+    --conic-angle: 180deg;
+    box-shadow: 0 0 15px 4px var(--glow-color);
+  }
+  100% {
+    --conic-angle: 360deg;
+    box-shadow: 0 0 15px var(--glow-color);
+  }
 }
