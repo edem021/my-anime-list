@@ -5,10 +5,10 @@ import Loading from "../components/Loading.jsx";
 import { FaYoutube } from "react-icons/fa";
 import { FaSquareXTwitter } from "react-icons/fa6";
 import { MdFavoriteBorder } from "react-icons/md";
-import { IoCaretBack } from "react-icons/io5";
 import { MdFavorite } from "react-icons/md";
 import { motion } from "framer-motion";
 import Colorthief from "colorthief";
+import VtuberProfilePicture from "../components/VtuberProfilePicture.jsx";
 
 const VtuberSongsPage = () => {
   const [vtuber, setVtuber] = useState([]);
@@ -16,7 +16,6 @@ const VtuberSongsPage = () => {
   const [favorites, setFavorites] = useState([]);
   const [colorPalette, setColorPalette] = useState(null);
   const { id } = useParams();
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchVtuber = async () => {
@@ -79,95 +78,77 @@ const VtuberSongsPage = () => {
       {loading ? (
         <Loading />
       ) : (
-        <div>
-          <div className="flex items-center gap-10">
-            {colorPalette && (
-              <div className="rounded-full relative z-100 p-1">
-                <Link to={vtuber.youtubeChannel} target="_blank">
-                  <img
-                    src={vtuber.profileImage}
-                    alt={vtuber.name}
-                    className="w-40 rounded-full"
-                  />
-                  <div
-                    className="absolute -top-[5%] -left-[5%] w-[110%] h-[110%] rounded-full -z-10 animate-conic-rotate"
-                    style={{
-                      background: `conic-gradient(from var(--conic-angle), ${colorPalette.first}, ${colorPalette.third}, ${colorPalette.first}, ${colorPalette.first}, ${colorPalette.third}, ${colorPalette.first})`,
-                      "--glow-color": colorPalette.first,
-                    }}
-                  />
-                </Link>
-                <div
-                  className="absolute -top-[13%] -left-[13%] w-[55%] h-[55%] -z-20 rounded-xl cursor-pointer hover:-translate-1 transition-transform duration-200"
-                  style={{
-                    background: `linear-gradient(120deg, ${colorPalette.first}, ${colorPalette.second})`,
-                    boxShadow: `0 0 6px ${colorPalette.first}`,
-                  }}
-                  onClick={() => navigate(-1)}
-                ></div>
-                <div className="absolute bg-base-300 w-[110%] h-[110%] rounded-full -top-[10%] -left-[10%] -z-20" />
-              </div>
-            )}
-            <div className="border-b border-base-content pb-2 flex justify-between w-full z-20">
-              <h2 className="text-4xl font-bold">{vtuber.name}</h2>
-
-              <div className="flex items-center gap-3">
-                <Link
-                  to={vtuber.youtubeChannel}
-                  target="_blank"
-                  className="relative"
-                >
-                  <FaYoutube size={35} color="red" />
-                  <span className="absolute top-2 left-2 w-[50%] h-[50%] bg-white -z-10" />
-                </Link>
-                <Link to={vtuber.twitter} target="_blank" className="relative">
-                  <FaSquareXTwitter size={32} color="black" />
-                  <span className="absolute top-1 left-1 w-[75%] h-[75%] bg-white -z-10" />
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-5 ml-47 select-none">
-            {vtuber.songs?.map((song) => (
-              <div
-                key={song._id}
-                className="flex justify-end border-dashed border-b border-base-content hover:bg-base-200/70 transition-colors duration-200"
-              >
-                <Link to={`song/${song._id}`} className="flex-1">
-                  <div className="flex items-center gap-5 ">
-                    <img
-                      src={song.coverImage}
-                      alt={song.title}
-                      className="w-50 rounded"
-                    />
-                    <div className="flex flex-col">
-                      <h2 className="text-xl">{song.title}</h2>
-                      <h3 className="text-sm font-semibold text-base-content/70">
-                        {song.originalTitle}
-                      </h3>
-                    </div>
-                  </div>
-                </Link>
-
-                <div className="flex items-center mr-5">
-                  <motion.div
-                    className="bg-base-content/50 p-1 rounded-full cursor-pointer"
-                    onClick={() => toggleFavorite(song._id)}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.9 }}
+        colorPalette && (
+          <div className="pl-2">
+            <div className="flex items-center gap-10">
+              <VtuberProfilePicture
+                vtuber={vtuber}
+                colorPalette={colorPalette}
+              />
+              <div className="border-b border-base-content pb-2 flex justify-between w-full z-20">
+                <h2 className="text-4xl font-bold">{vtuber.name}</h2>
+                <div className="flex items-center gap-3">
+                  <Link
+                    to={vtuber.youtubeChannel}
+                    target="_blank"
+                    className="relative"
                   >
-                    {favorites[song._id] ? (
-                      <MdFavorite size={30} color="red" />
-                    ) : (
-                      <MdFavoriteBorder size={30} color="white" />
-                    )}
-                  </motion.div>
+                    <FaYoutube size={35} color="red" />
+                    <span className="absolute top-2 left-2 w-[50%] h-[50%] bg-white -z-10" />
+                  </Link>
+                  <Link
+                    to={vtuber.twitter}
+                    target="_blank"
+                    className="relative"
+                  >
+                    <FaSquareXTwitter size={32} color="black" />
+                    <span className="absolute top-1 left-1 w-[75%] h-[75%] bg-white -z-10" />
+                  </Link>
                 </div>
               </div>
-            ))}
+            </div>
+
+            <div className="flex flex-col gap-5 ml-45 select-none">
+              {vtuber.songs?.map((song) => (
+                <div
+                  key={song._id}
+                  className="flex justify-end border-dashed border-b border-base-content hover:bg-base-200/70 transition-colors duration-200"
+                >
+                  <Link to={`song/${song._id}`} className="flex-1">
+                    <div className="flex items-center gap-5 ">
+                      <img
+                        src={song.coverImage}
+                        alt={song.title}
+                        className="w-50 rounded"
+                      />
+                      <div className="flex flex-col">
+                        <h2 className="text-xl">{song.title}</h2>
+                        <h3 className="text-sm font-semibold text-base-content/70">
+                          {song.originalTitle}
+                        </h3>
+                      </div>
+                    </div>
+                  </Link>
+
+                  <div className="flex items-center mr-5">
+                    <motion.div
+                      className="bg-base-content/50 p-1 rounded-full cursor-pointer"
+                      onClick={() => toggleFavorite(song._id)}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      {favorites[song._id] ? (
+                        <MdFavorite size={30} color="red" />
+                      ) : (
+                        <MdFavoriteBorder size={30} color="white" />
+                      )}
+                    </motion.div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )
       )}
     </div>
   );

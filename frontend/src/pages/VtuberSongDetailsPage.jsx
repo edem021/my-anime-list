@@ -8,6 +8,7 @@ import Lyrics from "../components/Lyrics.jsx";
 import LyricsSelection from "../components/LyricsSelection.jsx";
 import YoutubeContainer from "../components/YoutubeContainer.jsx";
 import { youtubeStateChange } from "../utils/youtubeStateChange.js";
+import { getYoutubeEmbedUrl } from "../utils/getYoutubeEmbedUrl.js";
 
 const VtuberSongDetailsPage = () => {
   const [song, setSong] = useState({});
@@ -46,16 +47,7 @@ const VtuberSongDetailsPage = () => {
     )
       return;
 
-    const getYouTubeEmbedUrl = (url) => {
-      const videoIdMatch = url.match(
-        /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
-      );
-      const videoId = videoIdMatch[1];
-      return `https://www.youtube.com/embed/${videoId}?enablejsapi=1`;
-    };
-
-    const embed = getYouTubeEmbedUrl(song.videoUrl);
-    setEmbedUrl(embed);
+    setEmbedUrl(getYoutubeEmbedUrl(song.videoUrl));
 
     const tag = document.createElement("script");
     tag.src = "https://www.youtube.com/iframe_api";
@@ -90,57 +82,55 @@ const VtuberSongDetailsPage = () => {
       className="flex flex-col gap-10 px-5 py-10"
       style={{ width: "calc(100vw - 18rem)" }}
     >
-      <div>
-        {loading ? (
-          <Loading />
-        ) : (
-          song.lyrics && (
-            <div className="flex">
-              <div
-                className="flex flex-col gap-5"
-                style={{ width: "calc(100vw - 50.5rem)" }}
-              >
-                <SongDetail song={song} />
+      {loading ? (
+        <Loading />
+      ) : (
+        song.lyrics && (
+          <div className="flex">
+            <div
+              className="flex flex-col gap-5"
+              style={{ width: "calc(100vw - 50.5rem)" }}
+            >
+              <SongDetail song={song} />
 
-                <LyricsSelection setActiveLyrics={setActiveLyrics} />
+              <LyricsSelection setActiveLyrics={setActiveLyrics} />
 
-                {activeLyrics === "lyrics" ? (
+              {activeLyrics === "lyrics" ? (
+                <TracingBeam>
+                  <div ref={lyricsContainerRef}>
+                    <Lyrics song={song} lyricsType="lyrics" />
+                  </div>
+                </TracingBeam>
+              ) : activeLyrics === "original" ? (
+                <TracingBeam>
+                  <div ref={lyricsContainerRef}>
+                    <Lyrics song={song} lyricsType="originalLyrics" />
+                  </div>
+                </TracingBeam>
+              ) : (
+                activeLyrics === "side-by-side" && (
                   <TracingBeam>
-                    <div ref={lyricsContainerRef}>
+                    <div className="flex gap-50" ref={lyricsContainerRef}>
                       <Lyrics song={song} lyricsType="lyrics" />
-                    </div>
-                  </TracingBeam>
-                ) : activeLyrics === "original" ? (
-                  <TracingBeam>
-                    <div ref={lyricsContainerRef}>
                       <Lyrics song={song} lyricsType="originalLyrics" />
                     </div>
                   </TracingBeam>
-                ) : (
-                  activeLyrics === "side-by-side" && (
-                    <TracingBeam>
-                      <div className="flex gap-50" ref={lyricsContainerRef}>
-                        <Lyrics song={song} lyricsType="lyrics" />
-                        <Lyrics song={song} lyricsType="originalLyrics" />
-                      </div>
-                    </TracingBeam>
-                  )
-                )}
-              </div>
-
-              <div className="fixed right-0 top-24 w-130 p-8">
-                {embedUrl && (
-                  <YoutubeContainer
-                    embedUrl={embedUrl}
-                    songTitle={song.title}
-                    id="youtube-player"
-                  />
-                )}
-              </div>
+                )
+              )}
             </div>
-          )
-        )}
-      </div>
+
+            <div className="fixed right-0 top-24 w-130 p-8">
+              {embedUrl && (
+                <YoutubeContainer
+                  embedUrl={embedUrl}
+                  songTitle={song.title}
+                  id="youtube-player"
+                />
+              )}
+            </div>
+          </div>
+        )
+      )}
     </div>
   );
 };
