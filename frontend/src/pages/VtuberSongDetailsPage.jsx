@@ -1,42 +1,49 @@
 import { useState, useEffect, useRef } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Loading from "../components/Loading.jsx";
 import { toast } from "sonner";
-import SongDetail from "../components/songDetail.jsx";
+import SongDetail from "../components/song details/SongDetail.jsx";
 import { TracingBeam } from "../components/ui/TracingBeam.jsx";
 import Lyrics from "../components/Lyrics.jsx";
 import LyricsSelection from "../components/LyricsSelection.jsx";
 import YoutubeContainer from "../components/YoutubeContainer.jsx";
 import { youtubeStateChange } from "../utils/youtubeStateChange.js";
 import { getYoutubeEmbedUrl } from "../utils/getYoutubeEmbedUrl.js";
+import { MdKeyboardBackspace } from "react-icons/md";
 
-const VtuberSongDetailsPage = () => {
+const VtuberSongDetailsPage = ({ vtubers }) => {
   const [song, setSong] = useState({});
+  const [vtuber, setVtuber] = useState({});
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const { songId, id } = useParams();
   const [embedUrl, setEmbedUrl] = useState(null);
   const [activeLyrics, setActiveLyrics] = useState("lyrics");
   const lyricsContainerRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchSong = async () => {
+    if (vtubers) {
       setLoading(true);
+      setError(null);
       try {
-        const res = await fetch(
-          `http://localhost:5000/api/vtuber/${id}/song/${songId}`
-        );
-        if (!res.ok) throw new Error("Failed to fetch song");
-        const data = await res.json();
-        setSong(data);
+        const vtuber = vtubers.find((vtuber) => vtuber._id === id);
+        if (!vtuber) throw new Error("Failed to find vtuber");
+
+        const song = vtuber.songs.find((song) => song._id === songId);
+        if (!song) throw new Error("Failed to find song");
+
+        setSong(song);
+        setVtuber(vtuber);
       } catch (error) {
-        console.error("Error fetching song:", error);
-        toast.error("Failed to load song");
+        console.error("Error finding song:", error);
+        toast.error("Cannot find song");
+        setError("Something went wrong, try again later...");
       } finally {
         setLoading(false);
       }
-    };
-    fetchSong();
-  }, [id, songId]);
+    }
+  }, [id, songId, vtubers]);
 
   useEffect(() => {
     if (
@@ -91,7 +98,19 @@ const VtuberSongDetailsPage = () => {
               className="flex flex-col gap-5"
               style={{ width: "calc(100vw - 50.5rem)" }}
             >
-              <SongDetail song={song} />
+              <div>
+                <div
+                  className="flex gap-2 items-center cursor-pointer hover:-translate-x-1.5 transition-transform duration-200"
+                  onClick={() => navigate(-1)}
+                >
+                  <MdKeyboardBackspace size={22} />
+                  <h3 className="font-semibold italic tracking-widest">
+                    Return to song selection
+                  </h3>
+                </div>
+              </div>
+
+              <SongDetail song={song} vtuber={vtuber} />
 
               <LyricsSelection setActiveLyrics={setActiveLyrics} />
 
@@ -131,6 +150,7 @@ const VtuberSongDetailsPage = () => {
           </div>
         )
       )}
+      {error && <h3 className="error-msg">{error}</h3>}
     </div>
   );
 };

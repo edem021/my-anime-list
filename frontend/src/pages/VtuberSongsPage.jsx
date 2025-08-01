@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import Loading from "../components/Loading.jsx";
 import { FaYoutube } from "react-icons/fa";
 import { FaSquareXTwitter } from "react-icons/fa6";
@@ -10,30 +10,32 @@ import { motion } from "framer-motion";
 import Colorthief from "colorthief";
 import VtuberProfilePicture from "../components/VtuberProfilePicture.jsx";
 
-const VtuberSongsPage = () => {
+const VtuberSongsPage = ({ vtubers }) => {
   const [vtuber, setVtuber] = useState([]);
   const [loading, setLoading] = useState(false);
   const [favorites, setFavorites] = useState([]);
   const [colorPalette, setColorPalette] = useState(null);
+  const [error, setError] = useState(null);
   const { id } = useParams();
 
   useEffect(() => {
-    const fetchVtuber = async () => {
+    if (vtubers) {
       setLoading(true);
+      setError(null);
       try {
-        const res = await fetch(`http://localhost:5000/api/vtuber/${id}`);
-        if (!res.ok) throw new Error("Failed to fetch vtuber");
-        const data = await res.json();
-        setVtuber(data);
+        const vtuber = vtubers.find((vtuber) => vtuber._id === id);
+        if (!vtuber) throw new Error("Failed to find vtuber");
+        
+        setVtuber(vtuber);
       } catch (error) {
-        console.error("Error fetching vtuber:", error);
-        toast.error("Failed to load vtuber");
+        console.error("Error finding vtuber", error.message);
+        toast.error("Cannot find vtuber");
+        setError("Something went wrong, try again later...");
       } finally {
         setLoading(false);
       }
-    };
-    fetchVtuber();
-  }, [id]);
+    }
+  }, [id, vtubers]);
 
   useEffect(() => {
     if (vtuber.profileImage) {
@@ -150,6 +152,7 @@ const VtuberSongsPage = () => {
           </div>
         )
       )}
+      {error && <h3 className="error-msg">{error}</h3>}
     </div>
   );
 };

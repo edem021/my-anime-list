@@ -14,19 +14,33 @@ import ArtistSongsPage from "./pages/ArtistsPage.jsx";
 import VtuberSongsPage from "./pages/VtuberSongsPage.jsx";
 import Particles from "./components/Particles.jsx";
 import VtuberSongDetailsPage from "./pages/VtuberSongDetailsPage.jsx";
+import CreateFormPage from "./pages/CreateFormPage.jsx";
+import { useEffect, useState } from "react";
 
 function App() {
+  const [api, setApi] = useState({});
   const location = useLocation();
+
+  useEffect(() => {
+    const fetchApiContent = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api");
+        if (!res.ok) throw new Error("Failed to fetch api content");
+        const data = await res.json();
+        setApi(data);
+      } catch (error) {
+        console.error("Error fetching api content", error);
+      }
+    };
+    fetchApiContent();
+  }, []);
 
   return (
     <div
       data-theme="sunset"
       className="min-h-screen w-full bg-base-300 relative"
     >
-      <div
-        className="absolute inset-0 z-0"
-        /* style={{ clipPath: "inset(80px 0 0 0)" }} */
-      >
+      <div className="absolute inset-0 z-0">
         <Particles
           particleColors={["#ffffff", "#ffffff"]}
           particleCount={1500}
@@ -60,6 +74,14 @@ function App() {
               }
             />
             <Route
+              path="/create"
+              element={
+                <PageTransition>
+                  <CreateFormPage />
+                </PageTransition>
+              }
+            />
+            <Route
               path="/schedule"
               element={
                 <PageTransition>
@@ -87,7 +109,7 @@ function App() {
               path="/vtuber"
               element={
                 <PageTransition>
-                  <VtubersPage />
+                  <VtubersPage vtubers={api.vtubers} />
                 </PageTransition>
               }
             />
@@ -103,7 +125,7 @@ function App() {
               path="/vtuber/:id"
               element={
                 <PageTransition>
-                  <VtuberSongsPage />
+                  <VtuberSongsPage vtubers={api.vtubers} />
                 </PageTransition>
               }
             />
@@ -111,7 +133,7 @@ function App() {
               path="/vtuber/:id/song/:songId"
               element={
                 <PageTransition>
-                  <VtuberSongDetailsPage />
+                  <VtuberSongDetailsPage vtubers={api.vtubers} />
                 </PageTransition>
               }
             />

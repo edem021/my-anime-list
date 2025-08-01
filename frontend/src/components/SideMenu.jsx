@@ -13,7 +13,7 @@ const SideMenu = () => {
   const location = useLocation();
 
   useEffect(() => {
-    let found = "home";
+    let found = "";
     for (const path in pathToActive) {
       if (matchPath({ path, end: true }, location.pathname)) {
         found = pathToActive[path];

@@ -27,12 +27,12 @@ const Header = () => {
       </div>
       <div className="flex gap-4">
         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-          <Link to="/login" className="login-btn">
+          <Link to="/create" className="header-btn">
             Create
           </Link>
         </motion.div>
         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-          <Link to="/login" className="login-btn">
+          <Link to="/login" className="header-btn">
             Login
           </Link>
         </motion.div>
