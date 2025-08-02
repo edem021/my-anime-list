@@ -4,10 +4,63 @@ import axios from "axios";
 
 export const createVtuber = async (req, res) => {
   try {
-    const vtuber = await Vtuber.create(req.body);
+    const { name, twitter } = req.body;
+    if (!name || !twitter) {
+      return res.status(400).json({ message: "required fields are missing" });
+    }
+
+    const customUrl = name
+      .split("")
+      .filter((letter) => letter.trim())
+      .join("");
+
+    const response = await axios.get(
+      `https://www.googleapis.com/youtube/v3/channels?part=snippet&forHandle=${customUrl}&key=${process.env.YOUTUBE_API_KEY}`
+    );
+
+    const channel = response.data.items[0];
+    if (!channel) {
+      return res
+        .status(404)
+        .json({ message: "Channel not found for the given custom URL" });
+    }
+
+    let originalName = "";
+
+    const japaneseMatches = [
+      ...channel.snippet.title.matchAll(
+        /[\p{sc=Katakana}\p{sc=Hiragana}\p{sc=Han}・ー\s]+/gu
+      ),
+    ].map((match) => match[0].trim());
+
+    if (japaneseMatches.length > 0) {
+      originalName = japaneseMatches.reduce((longest, current) =>
+        current.length > longest.length ? current : longest
+      );
+    }
+
+    const channelId = channel.id;
+    const youtubeChannel = `https://www.youtube.com/${
+      channel.snippet.customUrl || channelId
+    }`;
+    const profileImage =
+      channel.snippet.thumbnails.high?.url ||
+      channel.snippet.thumbnails.default.url;
+
+    const vtuber = await Vtuber.create({
+      name,
+      originalName,
+      profileImage,
+      youtubeChannel,
+      twitter,
+      channelId,
+    });
     res.status(201).json(vtuber);
   } catch (error) {
-    res.status(500).json({ message: "Error creating vtuber" });
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "Error creating vtuber", error: error.message });
   }
 };
 
@@ -26,24 +79,6 @@ export const getVtuberById = async (req, res) => {
     if (!vtuber) {
       return res.status(404).json({ message: "Vtuber not found" });
     }
-
-    if (vtuber.channelId && !vtuber.profileImage) {
-      try {
-        const res = await axios.get(
-          `https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${vtuber.channelId}&key=${process.env.YOUTUBE_API_KEY}`
-        );
-        const channel = res.data.items[0];
-        if (channel) {
-          vtuber.profileImage = channel.snippet.thumbnails.high.url;
-          await vtuber.save();
-        }
-      } catch (error) {
-        res
-          .status(500)
-          .json({ message: "Error fetching profile image", error });
-      }
-    }
-
     res.status(200).json(vtuber);
   } catch (error) {
     res.status(500).json({ message: "Error fetching vtuber", error });

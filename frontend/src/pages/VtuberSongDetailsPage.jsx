@@ -98,7 +98,7 @@ const VtuberSongDetailsPage = ({ vtubers }) => {
               className="flex flex-col gap-5"
               style={{ width: "calc(100vw - 50.5rem)" }}
             >
-              <div>
+              <div className="flex">
                 <div
                   className="flex gap-2 items-center cursor-pointer hover:-translate-x-1.5 transition-transform duration-200"
                   onClick={() => navigate(-1)}

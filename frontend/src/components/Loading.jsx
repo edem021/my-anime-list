@@ -2,11 +2,11 @@ import { useRef } from "react";
 import animationData from "../assets/loading.json";
 import Lottie from "lottie-react";
 
-const Loading = () => {
+const Loading = ({ size }) => {
   const loadingRef = useRef();
 
   return (
-    <div className="w-25">
+    <div style={{width: size}}>
       <Lottie
         onComplete={() => {
           loadingRef.current?.setDirection(-1);

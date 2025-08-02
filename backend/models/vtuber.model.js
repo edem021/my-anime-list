@@ -11,10 +11,7 @@ const vtuberSchema = new Schema(
     },
     originalName: {
       type: String,
-      required: true,
-      unique: true,
       trim: true,
-      minlength: [2, "Original name must be at least 2 characters long"],
     },
     profileImage: {
       type: String,
@@ -22,15 +19,15 @@ const vtuberSchema = new Schema(
     },
     youtubeChannel: {
       type: String,
-      required: true,
+      default: "",
     },
     twitter: {
       type: String,
-      required: true,
+      required: [true, "Twitter link required"],
     },
     channelId: {
       type: String,
-      required: true,
+      default: "",
     },
     songs: {
       type: [Schema.Types.ObjectId],
@@ -39,6 +36,7 @@ const vtuberSchema = new Schema(
   },
   {
     timestamps: true,
+    indexes: [{ key: { originalName: 1 }, unique: true }],
   }
 );
 

@@ -109,7 +109,7 @@ function App() {
               path="/vtuber"
               element={
                 <PageTransition>
-                  <VtubersPage vtubers={api.vtubers} />
+                  <VtubersPage />
                 </PageTransition>
               }
             />

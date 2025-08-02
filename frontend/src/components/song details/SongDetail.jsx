@@ -37,12 +37,18 @@ const SongDetail = ({ song, vtuber }) => {
           keyName={"Release Date:"}
         />
 
-        <SongDetailRow value={song.composer} keyName={"Composer:"} />
-
-        <SongDetailRow value={song.arranger} keyName={"Arranger:"} />
+        <SongDetailRow
+          value={song.composers.join(", ")}
+          keyName={"Composer:"}
+        />
 
         <SongDetailRow
-          value={song.lyricist}
+          value={song.arrangers.join(", ")}
+          keyName={"Arranger:"}
+        />
+
+        <SongDetailRow
+          value={song.lyricists.join(", ")}
           keyName={"Lyricist:"}
           hasBorder={false}
         />

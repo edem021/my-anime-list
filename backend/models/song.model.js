@@ -31,26 +31,21 @@ const songSchema = new Schema(
       type: Date,
       required: [true, "Release date is required"],
     },
-    composer: {
-      type: String,
-      required: [true, "Composer name is required"],
-      trim: true,
-      minlength: [2, "Composer name must be at least 2 characters long"],
+    composers: {
+      type: [String],
+      required: [true, "Composers name is required"],
     },
-    arranger: {
-      type: String,
+    arrangers: {
+      type: [String],
       required: [true, "Arranger name is required"],
-      trim: true,
-      minlength: [2, "Arranger name must be at least 2 characters long"],
     },
-    lyricist: {
-      type: String,
+    lyricists: {
+      type: [String],
       required: [true, "Lyricist name is required"],
-      trim: true,
-      minlength: [2, "Lyricist name must be at least 2 characters long"],
     },
     relatedArtists: {
       type: [String],
+      default: [],
     },
     lyrics: {
       type: [String],
@@ -64,6 +59,10 @@ const songSchema = new Schema(
       type: Map,
       of: Number,
       required: [true, "Timestamps are required"],
+    },
+    original: {
+      type: Boolean,
+      default: true,
     },
   },
   {

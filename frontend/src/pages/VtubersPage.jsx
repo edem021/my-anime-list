@@ -1,8 +1,31 @@
 import { Link } from "react-router-dom";
 import { FaYoutube } from "react-icons/fa";
 import { FaSquareXTwitter } from "react-icons/fa6";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
-const VtubersPage = ({ vtubers }) => {
+const VtubersPage = () => {
+  const [vtubers, setVtubers] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchVtubers = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch("http://localhost:5000/api/vtuber");
+        if (!res.ok) throw new Error("Failed to load vtubers");
+        const data = await res.json();
+        setVtubers(data);
+      } catch (error) {
+        console.error("Error fetching vtubers");
+        toast.error("Couldn't load vtubers");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchVtubers();
+  }, []);
+
   return (
     <div
       className="flex flex-col gap-10 px-5 py-10"
