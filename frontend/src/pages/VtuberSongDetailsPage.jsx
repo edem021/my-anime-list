@@ -138,7 +138,7 @@ const VtuberSongDetailsPage = ({ vtubers }) => {
               )}
             </div>
 
-            <div className="fixed right-0 top-24 w-130 p-8">
+            <div className="fixed right-0 top-24 w-130 p-5">
               {embedUrl && (
                 <YoutubeContainer
                   embedUrl={embedUrl}

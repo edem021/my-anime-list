@@ -15,9 +15,8 @@ const songSchema = new Schema(
     },
     originalTitle: {
       type: String,
-      required: [true, "Original title is required"],
       trim: true,
-      minlength: [2, "Original title must be at least 2 characters long"],
+      default: "",
     },
     videoUrl: {
       type: String,
@@ -33,15 +32,15 @@ const songSchema = new Schema(
     },
     composers: {
       type: [String],
-      required: [true, "Composers name is required"],
+      default: [],
     },
     arrangers: {
       type: [String],
-      required: [true, "Arranger name is required"],
+      default: [],
     },
     lyricists: {
       type: [String],
-      required: [true, "Lyricist name is required"],
+      default: [],
     },
     relatedArtists: {
       type: [String],
@@ -62,12 +61,25 @@ const songSchema = new Schema(
     },
     original: {
       type: Boolean,
-      default: true,
+      required: [true, "Original is requierd"],
     },
   },
   {
     timestamps: true,
-    indexes: [{ key: { vtuber: 1, title: 1 }, unique: true }],
+    indexes: [
+      {
+        key: {
+          vtuber: 1,
+          title: 1,
+          composers: 1,
+          arrangers: 1,
+          lyricists: 1,
+          relatedArtists: 1,
+          originalTitle: 1,
+        },
+        unique: true,
+      },
+    ],
   }
 );
 
