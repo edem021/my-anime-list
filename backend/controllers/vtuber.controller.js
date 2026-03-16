@@ -114,14 +114,56 @@ export const deleteVtuber = async (req, res) => {
 
 export const createSongForVtuber = async (req, res) => {
   try {
-    const vtuber = await Vtuber.findById(req.params.id);
+    const {
+      name,
+      title,
+      originalTitle,
+      releaseDate,
+      composers,
+      arrangers,
+      lyricists,
+      relatedArtists,
+      lyrics,
+      originalLyrics,
+      timestamps,
+      original,
+    } = req.body;
+    
+    if (!name || !title || !releaseDate || !lyrics || !timestamps) {
+      return res.status(400).json({ message: "required fields are missing" });
+    }
+
+    const vtuber = await Vtuber.findOne({ name });
     if (!vtuber) {
       return res.status(404).json({ message: "Vtuber not found" });
     }
-    const song = await Song.create(req.body);
+
+    const convertedLyrics = lyrics.split("/").map((line) => line.trim());
+    const convertedOriginalLyrics = originalLyrics
+      ? originalLyrics.split("/").map((line) => line.trim())
+      : [];
+
+    const song = await Song.create({
+      vtuber: vtuber._id,
+      title,
+      originalTitle,
+      releaseDate,
+      composers: composers ? composers.split(",").map((c) => c.trim()) : [],
+      arrangers: arrangers ? arrangers.split(",").map((a) => a.trim()) : [],
+      lyricists: lyricists ? lyricists.split(",").map((l) => l.trim()) : [],
+      relatedArtists: relatedArtists
+        ? relatedArtists.split(",").map((r) => r.trim())
+        : [],
+      lyrics: convertedLyrics,
+      originalLyrics: convertedOriginalLyrics,
+      timestamps: JSON.parse(timestamps),
+      original,
+    });
+
     vtuber.songs.push(song._id);
     await vtuber.save();
-    res.status(201).json({ message: "Song created successfully", song });
+
+    res.status(201).json(song);
   } catch (error) {
     console.error("Error creating song:", error);
     res.status(500).json({ message: "Error creating song" });

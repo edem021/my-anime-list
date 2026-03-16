@@ -18,11 +18,11 @@ const router = express.Router();
 router.post("/", createVtuber);
 router.get("/", getVtubers);
 
+router.post("/song", createSongForVtuber);
+
 router.get("/:id", getVtuberById);
 router.put("/:id", updateVtuber);
 router.delete("/:id", deleteVtuber);
-
-router.post("/:id/song", createSongForVtuber);
 
 router.get("/:id/song/:songId", getSongByIdForVtuber);
 router.put("/:id/song/:songId", updateSongForVtuber);

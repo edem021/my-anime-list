@@ -20,11 +20,9 @@ const songSchema = new Schema(
     },
     videoUrl: {
       type: String,
-      required: [true, "Video URL is required"],
     },
     coverImage: {
       type: String,
-      required: [true, "Cover image URL is required"],
     },
     releaseDate: {
       type: Date,
