@@ -11,12 +11,14 @@ import {
   updateSongForVtuber,
   deleteSongForVtuber,
   updateProfilePicture,
+  youtubeSearch,
 } from "../controllers/vtuber.controller.js";
 
 const router = express.Router();
 
 router.post("/", createVtuber);
 router.get("/", getVtubers);
+router.get("/youtube-search", youtubeSearch);
 
 router.post("/song", createSongForVtuber);
 

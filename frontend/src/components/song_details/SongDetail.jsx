@@ -42,10 +42,12 @@ const SongDetail = ({ song, vtuber }) => {
           keyName={"Composer:"}
         />
 
-        <SongDetailRow
-          value={song.arrangers.join(", ")}
-          keyName={"Arranger:"}
-        />
+        {song.arrangers.length > 0 && (
+          <SongDetailRow
+            value={song.arrangers.join(", ")}
+            keyName={"Arranger:"}
+          />
+        )}
 
         <SongDetailRow
           value={song.lyricists.join(", ")}

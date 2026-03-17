@@ -118,6 +118,8 @@ export const createSongForVtuber = async (req, res) => {
       name,
       title,
       originalTitle,
+      videoUrl,
+      coverImage,
       releaseDate,
       composers,
       arrangers,
@@ -138,15 +140,23 @@ export const createSongForVtuber = async (req, res) => {
       return res.status(404).json({ message: "Vtuber not found" });
     }
 
-    const convertedLyrics = lyrics.split("/").map((line) => line.trim());
+    const convertedLyrics = lyrics
+      .split("\n")
+      .map((line) => line.replace(/\r$/, ""))
+      .map((line) => line);
     const convertedOriginalLyrics = originalLyrics
-      ? originalLyrics.split("/").map((line) => line.trim())
+      ? originalLyrics
+          .split("\n")
+          .map((line) => line.replace(/\r$/, ""))
+          .map((line) => line)
       : [];
 
     const song = await Song.create({
       vtuber: vtuber._id,
       title,
       originalTitle,
+      videoUrl: videoUrl || undefined,
+      coverImage: coverImage || undefined,
       releaseDate,
       composers: composers ? composers.split(",").map((c) => c.trim()) : [],
       arrangers: arrangers ? arrangers.split(",").map((a) => a.trim()) : [],
@@ -236,6 +246,39 @@ export const deleteSongForVtuber = async (req, res) => {
     res.status(200).json({ message: "Song deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: "Error deleting song" });
+  }
+};
+
+export const youtubeSearch = async (req, res) => {
+  try {
+    const { q } = req.query;
+    if (!q || typeof q !== "string" || !q.trim()) {
+      return res.status(400).json({ message: "Search query is required" });
+    }
+    
+    const response = await axios.get(
+      "https://www.googleapis.com/youtube/v3/search",
+      {
+        params: {
+          part: "snippet",
+          q: q.trim(),
+          type: "video",
+          maxResults: 15,
+          key: process.env.YOUTUBE_API_KEY,
+        },
+      }
+    );
+
+    const items = (response.data.items || []).map((item) => ({
+      videoId: item.id?.videoId,
+      title: item.snippet?.title,
+      channelTitle: item.snippet?.channelTitle,
+      thumbnail: item.snippet?.thumbnails?.high?.url || item.snippet?.thumbnails?.medium?.url || item.snippet?.thumbnails?.default?.url,
+    })).filter((item) => item.videoId);
+    res.status(200).json({ items });
+  } catch (error) {
+    console.error("YouTube search error:", error);
+    res.status(500).json({ message: "YouTube search failed", error: error.message });
   }
 };
 

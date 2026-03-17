@@ -40,7 +40,7 @@ function App() {
       data-theme="sunset"
       className="min-h-screen w-full bg-base-300 relative"
     >
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-0 min-h-screen">
         <Particles
           particleColors={["#ffffff", "#ffffff"]}
           particleCount={1500}

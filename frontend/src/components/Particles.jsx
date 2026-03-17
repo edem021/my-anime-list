@@ -113,8 +113,10 @@ const Particles = ({
       renderer.setSize(width, height);
       camera.perspective({ aspect: gl.canvas.width / gl.canvas.height });
     };
-    window.addEventListener("resize", resize, false);
     resize();
+    const resizeObserver = new ResizeObserver(resize);
+    resizeObserver.observe(container);
+    window.addEventListener("resize", resize, false);
 
     const handleMouseMove = (e) => {
       const rect = container.getBoundingClientRect();
@@ -208,9 +210,10 @@ const Particles = ({
     animationFrameId = requestAnimationFrame(update);
 
     return () => {
+      resizeObserver.disconnect();
       window.removeEventListener("resize", resize);
       if (moveParticlesOnHover) {
-        container.removeEventListener("mousemove", handleMouseMove);
+        window.removeEventListener("mousemove", handleMouseMove);
       }
       cancelAnimationFrame(animationFrameId);
       if (container.contains(gl.canvas)) {
@@ -232,7 +235,7 @@ const Particles = ({
   ]);
 
   return (
-    <div ref={containerRef} className={`relative w-full h-full ${className}`} />
+    <div ref={containerRef} className={`relative w-full min-h-full h-full min-h-screen ${className}`} />
   );
 };
 

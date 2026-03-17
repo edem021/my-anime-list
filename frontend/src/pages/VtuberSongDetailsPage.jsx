@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Loading from "../components/Loading.jsx";
 import { toast } from "sonner";
-import SongDetail from "../components/song details/SongDetail.jsx";
+import SongDetail from "../components/song_details/SongDetail.jsx";
 import { TracingBeam } from "../components/ui/TracingBeam.jsx";
 import Lyrics from "../components/Lyrics.jsx";
 import LyricsSelection from "../components/LyricsSelection.jsx";
@@ -22,6 +22,7 @@ const VtuberSongDetailsPage = ({ vtubers }) => {
   const lyricsContainerRef = useRef(null);
   const navigate = useNavigate();
 
+  // Fetch song
   useEffect(() => {
     if (vtubers) {
       setLoading(true);
@@ -45,6 +46,7 @@ const VtuberSongDetailsPage = ({ vtubers }) => {
     }
   }, [id, songId, vtubers]);
 
+  // Load YouTube iframe API
   useEffect(() => {
     if (
       !song ||

@@ -9,6 +9,8 @@ import { MdFavorite } from "react-icons/md";
 import { motion } from "framer-motion";
 import Colorthief from "colorthief";
 import VtuberProfilePicture from "../components/VtuberProfilePicture.jsx";
+import { TbEdit } from "react-icons/tb";
+import EditSongModal from "../components/form_components/edit_song_modal/EditSongModal.jsx";
 
 const VtuberSongsPage = ({ vtubers }) => {
   const [vtuber, setVtuber] = useState([]);
@@ -16,8 +18,13 @@ const VtuberSongsPage = ({ vtubers }) => {
   const [favorites, setFavorites] = useState([]);
   const [colorPalette, setColorPalette] = useState(null);
   const [error, setError] = useState(null);
+  const [showEditSongModal, setShowEditSongModal] = useState({
+    open: false,
+    song: {},
+  });
   const { id } = useParams();
 
+  // Fetch vtuber
   useEffect(() => {
     if (vtubers) {
       setLoading(true);
@@ -25,7 +32,7 @@ const VtuberSongsPage = ({ vtubers }) => {
       try {
         const vtuber = vtubers.find((vtuber) => vtuber._id === id);
         if (!vtuber) throw new Error("Failed to find vtuber");
-        
+
         setVtuber(vtuber);
       } catch (error) {
         console.error("Error finding vtuber", error.message);
@@ -37,6 +44,7 @@ const VtuberSongsPage = ({ vtubers }) => {
     }
   }, [id, vtubers]);
 
+  // Extract color from profile picture
   useEffect(() => {
     if (vtuber.profileImage) {
       const imageUrl = `http://localhost:5000/api/vtuber/proxy-image/${encodeURIComponent(
@@ -65,6 +73,7 @@ const VtuberSongsPage = ({ vtubers }) => {
     }
   }, [vtuber.profileImage]);
 
+  // Toggle favorite
   const toggleFavorite = async (songId) => {
     setFavorites((prev) => ({
       ...prev,
@@ -83,26 +92,15 @@ const VtuberSongsPage = ({ vtubers }) => {
         colorPalette && (
           <div className="pl-2">
             <div className="flex items-center gap-10">
-              <VtuberProfilePicture
-                vtuber={vtuber}
-                colorPalette={colorPalette}
-              />
+              <VtuberProfilePicture vtuber={vtuber} colorPalette={colorPalette} />
               <div className="border-b border-base-content pb-2 flex justify-between w-full z-20">
                 <h2 className="text-4xl font-bold">{vtuber.name}</h2>
                 <div className="flex items-center gap-3">
-                  <Link
-                    to={vtuber.youtubeChannel}
-                    target="_blank"
-                    className="relative"
-                  >
+                  <Link to={vtuber.youtubeChannel} target="_blank" className="relative">
                     <FaYoutube size={35} color="red" />
                     <span className="absolute top-2 left-2 w-[50%] h-[50%] bg-white -z-10" />
                   </Link>
-                  <Link
-                    to={vtuber.twitter}
-                    target="_blank"
-                    className="relative"
-                  >
+                  <Link to={vtuber.twitter} target="_blank" className="relative">
                     <FaSquareXTwitter size={32} color="black" />
                     <span className="absolute top-1 left-1 w-[75%] h-[75%] bg-white -z-10" />
                   </Link>
@@ -132,7 +130,16 @@ const VtuberSongsPage = ({ vtubers }) => {
                     </div>
                   </Link>
 
-                  <div className="flex items-center mr-5">
+                  <div className="flex items-center mr-5 gap-1.5">
+                    <motion.div
+                      className="bg-base-content/50 p-1 rounded-full cursor-pointer"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => setShowEditSongModal({ open: true, song: song })}
+                    >
+                      <TbEdit size={30} color="white" />
+                    </motion.div>
+
                     <motion.div
                       className="bg-base-content/50 p-1 rounded-full cursor-pointer"
                       onClick={() => toggleFavorite(song._id)}
@@ -153,6 +160,15 @@ const VtuberSongsPage = ({ vtubers }) => {
         )
       )}
       {error && <h3 className="error-msg">{error}</h3>}
+
+      {showEditSongModal.open && (
+        <EditSongModal
+          song={showEditSongModal.song}
+          vtuberId={id}
+          setShowEditSongModal={setShowEditSongModal}
+        />
+      )}
+      {showEditSongModal.open && console.log(showEditSongModal)}
     </div>
   );
 };

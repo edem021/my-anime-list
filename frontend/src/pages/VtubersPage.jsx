@@ -34,6 +34,7 @@ const VtubersPage = () => {
       <h2 className="text-4xl font-bold border-b border-base-content pb-2">
         Vtubers
       </h2>
+      
       <div className="flex flex-col gap-5">
         {vtubers?.map((vtuber) => (
           <div

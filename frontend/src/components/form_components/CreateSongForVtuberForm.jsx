@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, use } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
@@ -46,6 +46,8 @@ const songSchema = z.object({
     .transform((str) => (str ? str.trim() : "")),
   timestamps: z.string().transform((str) => (str ? str.trim() : "")),
   original: z.boolean().default(false),
+  videoUrl: z.string().optional().transform((str) => (str ? str.trim() : "")),
+  coverImage: z.string().optional().transform((str) => (str ? str.trim() : "")),
 });
 
 const CreateSongForVtuberForm = () => {
@@ -64,6 +66,8 @@ const CreateSongForVtuberForm = () => {
     originalLyrics: "",
     timestamps: "",
     original: false,
+    videoUrl: "",
+    coverImage: "",
   });
   const [timestampPairs, setTimestampPairs] = useState([
     { time: "", line: "" },
@@ -72,7 +76,9 @@ const CreateSongForVtuberForm = () => {
   const lyricsTextAreaRef = useRef(null);
   const originalLyricsTextAreaRef = useRef(null);
   const [searchTitle, setSearchTitle] = useState("");
-  const [searchedItem, setSearchedItem] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState("");
 
   useEffect(() => {
     if (lyricsTextAreaRef.current) {
@@ -117,7 +123,7 @@ const CreateSongForVtuberForm = () => {
   };
 
   const addTimestampPair = () => {
-    setTimestampPairs([...timestampPairs, { time: "", description: "" }]);
+    setTimestampPairs([...timestampPairs, { time: "", line: "" }]);
   };
 
   const removeTimestampPair = (index) => {
@@ -131,19 +137,43 @@ const CreateSongForVtuberForm = () => {
     }
   };
 
-  const handleSearchedTitle = async (title) => {
-    const name = songForVtuberForm.name.replace(" ", "");
+  const handleSearchVideos = async () => {
+    const query = searchTitle.trim();
+    if (!query) {
+      setSearchError("Enter a search term");
+      return;
+    }
+
+    setSearchError("");
+    setSearchLoading(true);
+    setSearchResults([]);
+
     try {
       const res = await fetch(
-        `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${name} ${title}&type=video&videoCategoryId=10&key=${process.env.REACT_APP_YOUTUBE_API_KEY}`
+        `http://localhost:5000/api/vtuber/youtube-search?q=${encodeURIComponent(query)}`
       );
-      if (!res.ok) throw new Error("Failed to fetch searched title");
+      if (!res.ok) throw new Error("Search failed");
       const data = await res.json();
-      const channel = data.items;
-      console.log(channel);
+      setSearchResults(data.items || []);
+      if (!data.items?.length) setSearchError("No videos found");
     } catch (error) {
-      console.error("Error fetching searched title", error);
+      console.error("YouTube search error", error);
+      setSearchError("Could not search. Try again.");
+      setSearchResults([]);
+    } finally {
+      setSearchLoading(false);
     }
+  };
+
+  const handleSelectVideo = (item) => {
+    setSongForVtuberForm((prev) => ({
+      ...prev,
+      title: item.title,
+      videoUrl: `https://www.youtube.com/watch?v=${item.videoId}`,
+      coverImage: item.thumbnail || "",
+    }));
+    setSearchResults([]);
+    setSearchTitle("");
   };
 
   const handleSumbit = async (event) => {
@@ -164,12 +194,17 @@ const CreateSongForVtuberForm = () => {
 
     try {
       setLoading(true);
+
+      const payload = {
+        ...songForVtuberForm,
+      };
+
       const res = await fetch("http://localhost:5000/api/vtuber/song", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(songForVtuberForm),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) throw new Error("Failed to submit form");
@@ -191,7 +226,7 @@ const CreateSongForVtuberForm = () => {
 
   return (
     <form
-      className="border-t border-b border-dashed flex flex-col gap-2 p-5 w-full"
+      className="border-b border-dashed flex flex-col gap-2 p-5 pt-0 w-full"
       onSubmit={handleSumbit}
     >
       <h2 className="text-xl">Create Song for Vtuber</h2>
@@ -209,27 +244,91 @@ const CreateSongForVtuberForm = () => {
           <p className="text-error text-sm mb-2">{errors.name}</p>
         )}
 
-        <div className="border rounded h-100 p-5 flex flex-col overflow-y-auto">
-          <div className="px-4 py-1 rounded-md flex justify-between items-center gap-2 bg-base-100 h-10 shadow-2xs shadow-black">
+        <div className="border rounded p-5 flex flex-col gap-3">
+          <p className="text-sm text-base-content/80">
+            Search for the video (like on YouTube), then click a result to fill title, thumbnail and video URL.
+          </p>
+          <div className="flex gap-2">
             <input
               type="text"
-              placeholder="Search title (after typing vtuber name first)"
+              placeholder="Search by video title..."
               value={searchTitle}
-              onChange={(e) => setSearchTitle(e.target.value)}
-              className="rounded-md focus:outline-0 pr-2 w-full"
+              onChange={(e) => {
+                setSearchTitle(e.target.value);
+                setSearchError("");
+              }}
+              onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleSearchVideos())}
+              className="rounded-md focus:outline-0 p-2 border flex-1"
             />
-            <FaSearch
-              size={18}
-              className="cursor-pointer text-neutral-content"
-              onClick={() => handleSearchedTitle(searchTitle)}
-            />
+            <button
+              type="button"
+              onClick={handleSearchVideos}
+              disabled={searchLoading}
+              className="rounded-md px-3 py-2 bg-primary text-primary-content hover:opacity-90 disabled:opacity-50 flex items-center gap-2"
+            >
+              {searchLoading ? (
+                <Loading size="1rem" />
+              ) : (
+                <FaSearch size={18} />
+              )}
+              Search
+            </button>
           </div>
-          {errors.title && (
-            <p className="text-error text-sm mb-2">{errors.title}</p>
+          {searchError && (
+            <p className="text-error text-sm">{searchError}</p>
           )}
-
-          <div>{searchedItem && <></>}</div>
+          {searchResults.length > 0 && (
+            <div className="grid gap-2 max-h-64 overflow-y-auto border rounded p-2 bg-base-200/30">
+              {searchResults.map((item) => (
+                <button
+                  key={item.videoId}
+                  type="button"
+                  onClick={() => handleSelectVideo(item)}
+                  className="flex gap-3 items-center text-left p-2 rounded hover:bg-base-300 transition-colors cursor-pointer"
+                >
+                  <img
+                    src={item.thumbnail}
+                    alt=""
+                    className="w-24 h-14 object-cover rounded shrink-0"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-sm line-clamp-2">{item.title}</p>
+                    {item.channelTitle && (
+                      <p className="text-xs text-base-content/70 truncate">{item.channelTitle}</p>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+          {songForVtuberForm.videoUrl && (
+            <div className="flex gap-3 items-center p-3 rounded border bg-base-200/30">
+              {songForVtuberForm.coverImage && (
+                <img
+                  src={songForVtuberForm.coverImage}
+                  alt=""
+                  className="w-20 h-12 object-cover rounded shrink-0"
+                />
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-sm truncate">{songForVtuberForm.title || "Video selected"}</p>
+                <p className="text-xs text-base-content/70 truncate">{songForVtuberForm.videoUrl}</p>
+              </div>
+            </div>
+          )}
         </div>
+
+        <input
+          type="text"
+          name="title"
+          placeholder="Song / video title"
+          value={songForVtuberForm.title}
+          onChange={handleChange}
+          className="p-2 border rounded"
+        />
+        {errors.title && (
+          <p className="text-error text-sm mb-2">{errors.title}</p>
+        )}
 
         <input
           type="date"
