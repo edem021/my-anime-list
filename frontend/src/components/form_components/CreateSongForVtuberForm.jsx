@@ -50,7 +50,7 @@ const songSchema = z.object({
   coverImage: z.string().optional().transform((str) => (str ? str.trim() : "")),
 });
 
-const CreateSongForVtuberForm = () => {
+const CreateSongForVtuberForm = ({ refetchApi }) => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [songForVtuberForm, setSongForVtuberForm] = useState({
@@ -211,11 +211,11 @@ const CreateSongForVtuberForm = () => {
 
       const data = await res.json();
 
-      console.log(data);
+      toast.success("Song created successfully");
 
-      toast.success("Vtuber created successfully");
+      if (refetchApi) await refetchApi();
 
-      navigate("/vtuber");
+      navigate(data.vtuber ? `/vtuber/${data.vtuber}` : "/vtuber");
     } catch (error) {
       console.error("Error sending form data", error);
       toast.error("Couldn't submit form");

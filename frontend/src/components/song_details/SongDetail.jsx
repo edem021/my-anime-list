@@ -1,13 +1,14 @@
 import SongDetailRow from "./SongDetailRow";
+import { getProxiedImageUrl } from "../../utils/getProxiedImageUrl";
 
 const SongDetail = ({ song, vtuber }) => {
   return (
     <div className="flex flex-col border-2 rounded shadow-md shadow-black">
       <div className="flex items-center gap-5 p-5 w-full border-b border-dashed border-base-content">
         <img
-          src={song.coverImage}
+          src={getProxiedImageUrl(song.coverImage)}
           alt={song.title}
-          className="w-70 rounded-md"
+          className="w-70 rounded-md object-cover"
         />
         <div>
           <h2 className="text-2xl">{vtuber.name}</h2>

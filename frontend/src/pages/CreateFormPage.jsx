@@ -1,7 +1,7 @@
 import CreateVtuberForm from "../components/form_components/CreateVtuberForm.jsx";
 import CreateSongForVtuberForm from "../components/form_components/CreateSongForVtuberForm.jsx";
 
-const CreateFormPage = () => {
+const CreateFormPage = ({ refetchApi }) => {
   return (
     <div
       className="flex py-10 justify-center"
@@ -12,7 +12,7 @@ const CreateFormPage = () => {
 
         <CreateVtuberForm />
 
-        <CreateSongForVtuberForm />
+        <CreateSongForVtuberForm refetchApi={refetchApi} />
       </div>
     </div>
   );

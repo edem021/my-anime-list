@@ -2,6 +2,28 @@ import Vtuber from "../models/vtuber.model.js";
 import Song from "../models/song.model.js";
 import axios from "axios";
 
+const capitalizeFirstChar = (line) => {
+  if (typeof line !== "string" || line.length === 0) return line;
+  const firstCharIndex = line.search(/\S/);
+  if (firstCharIndex === -1) return line;
+  return (
+    line.slice(0, firstCharIndex) +
+    line.charAt(firstCharIndex).toUpperCase() +
+    line.slice(firstCharIndex + 1)
+  );
+};
+
+const normalizeLyricsLines = (value) => {
+  if (!value) return [];
+  if (Array.isArray(value)) {
+    return value.map((line) => capitalizeFirstChar(String(line ?? "")));
+  }
+  return String(value)
+    .split("\n")
+    .map((line) => line.replace(/\r$/, ""))
+    .map((line) => capitalizeFirstChar(line));
+};
+
 export const createVtuber = async (req, res) => {
   try {
     const { name, twitter } = req.body;
@@ -140,16 +162,8 @@ export const createSongForVtuber = async (req, res) => {
       return res.status(404).json({ message: "Vtuber not found" });
     }
 
-    const convertedLyrics = lyrics
-      .split("\n")
-      .map((line) => line.replace(/\r$/, ""))
-      .map((line) => line);
-    const convertedOriginalLyrics = originalLyrics
-      ? originalLyrics
-          .split("\n")
-          .map((line) => line.replace(/\r$/, ""))
-          .map((line) => line)
-      : [];
+    const convertedLyrics = normalizeLyricsLines(lyrics);
+    const convertedOriginalLyrics = normalizeLyricsLines(originalLyrics);
 
     const song = await Song.create({
       vtuber: vtuber._id,
@@ -220,7 +234,15 @@ export const updateSongForVtuber = async (req, res) => {
     if (!vtuber) {
       return res.status(404).json({ message: "Vtuber not found" });
     }
-    const song = await Song.findByIdAndUpdate(req.params.songId, req.body, {
+    const payload = { ...req.body };
+    if ("lyrics" in payload) {
+      payload.lyrics = normalizeLyricsLines(payload.lyrics);
+    }
+    if ("originalLyrics" in payload) {
+      payload.originalLyrics = normalizeLyricsLines(payload.originalLyrics);
+    }
+
+    const song = await Song.findByIdAndUpdate(req.params.songId, payload, {
       new: true,
       runValidators: true,
     });

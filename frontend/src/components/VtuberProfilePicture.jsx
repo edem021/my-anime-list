@@ -1,15 +1,16 @@
 import { Link, useNavigate } from "react-router-dom";
+import { getProxiedImageUrl } from "../utils/getProxiedImageUrl";
 
-const VtuberProfilePicture = ({vtuber, colorPalette}) => {
+const VtuberProfilePicture = ({ vtuber, colorPalette }) => {
   const navigate = useNavigate();
 
   return (
     <div className="rounded-full relative z-100 p-1">
       <Link to={vtuber.youtubeChannel} target="_blank" className="group">
         <img
-          src={vtuber.profileImage}
+          src={getProxiedImageUrl(vtuber.profileImage)}
           alt={vtuber.name}
-          className="w-40 rounded-full group-hover:scale-103 transition-transform duration-200"
+          className="w-40 rounded-full group-hover:scale-103 transition-transform duration-200 object-cover"
         />
         <div
           className="absolute -top-[5%] -left-[5%] w-[110%] h-[110%] rounded-full -z-10 animate-conic-rotate"

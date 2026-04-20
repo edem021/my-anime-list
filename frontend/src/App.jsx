@@ -21,17 +21,18 @@ function App() {
   const [api, setApi] = useState({});
   const location = useLocation();
 
+  const fetchApiContent = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api");
+      if (!res.ok) throw new Error("Failed to fetch api content");
+      const data = await res.json();
+      setApi(data);
+    } catch (error) {
+      console.error("Error fetching api content", error);
+    }
+  };
+
   useEffect(() => {
-    const fetchApiContent = async () => {
-      try {
-        const res = await fetch("http://localhost:5000/api");
-        if (!res.ok) throw new Error("Failed to fetch api content");
-        const data = await res.json();
-        setApi(data);
-      } catch (error) {
-        console.error("Error fetching api content", error);
-      }
-    };
     fetchApiContent();
   }, []);
 
@@ -77,7 +78,7 @@ function App() {
               path="/create"
               element={
                 <PageTransition>
-                  <CreateFormPage />
+                  <CreateFormPage refetchApi={fetchApiContent} />
                 </PageTransition>
               }
             />

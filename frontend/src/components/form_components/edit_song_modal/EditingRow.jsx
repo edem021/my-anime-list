@@ -13,7 +13,10 @@ const EditingRow = ({ label, name, value, onChange, type = "text" }) => {
 
   return (
     <div className="flex items-center gap-2">
-      <label className="text-lg font-semibold mr-2 w-34 text-right" style={name === "timestamps" ? {marginLeft: "1.1rem"} : {}}>
+      <label
+        className="text-lg font-semibold mr-2 w-34 text-right"
+        style={name === "timestamps" ? { marginLeft: "1.1rem" } : {}}
+      >
         {label}:
       </label>
       {type === "checkbox" ? (
@@ -21,7 +24,7 @@ const EditingRow = ({ label, name, value, onChange, type = "text" }) => {
           <input
             type="checkbox"
             name={name}
-            value={value}
+            checked={value}
             onChange={(e) => onChange(e.target.checked)}
             className="p-2 border rounded flex-1"
           />
@@ -33,6 +36,14 @@ const EditingRow = ({ label, name, value, onChange, type = "text" }) => {
           value={Array.isArray(value) ? value.join("\n") : value || ""}
           onChange={(e) => onChange(e.target.value)}
           className="p-2 border rounded flex-1 overflow-hidden resize-none"
+        />
+      ) : type === "date" ? (
+        <input
+          type="date"
+          name={name}
+          value={new Date(value).toISOString().split("T")[0]}
+          onChange={(e) => onChange(e.target.value)}
+          className="p-2 border rounded flex-1"
         />
       ) : name === "timestamps" ? (
         <div className="flex flex-col gap-2 w-full">

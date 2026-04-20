@@ -30,7 +30,9 @@ const EditSongModal = ({ song, vtuberId, setShowEditSongModal }) => {
           .split("\n")
           .map((line) => line.replace(/\r$/, "")) // strip \r from Windows newlines
           .map((line) => line) // keep empty lines as-is
-          .filter((line, index, arr) => index === arr.length - 1 ? line !== "" : true); // drop trailing blank
+          .filter((line, index, arr) =>
+            index === arr.length - 1 ? line !== "" : true,
+          ); // drop trailing blank
       };
 
       const normalizeTimestamps = (value) => {
@@ -69,7 +71,7 @@ const EditSongModal = ({ song, vtuberId, setShowEditSongModal }) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(payload),
-        }
+        },
       );
 
       if (!res.ok) {
@@ -112,6 +114,15 @@ const EditSongModal = ({ song, vtuberId, setShowEditSongModal }) => {
               onChange={(value) =>
                 setEditSongForm({ ...editSongForm, originalTitle: value })
               }
+            />
+            <EditingRow
+              label="Release Date"
+              name="releaseDate"
+              value={editSongForm.releaseDate}
+              onChange={(value) =>
+                setEditSongForm({ ...editSongForm, releaseDate: value })
+              }
+              type="date"
             />
             <EditingRow
               label="Composers"

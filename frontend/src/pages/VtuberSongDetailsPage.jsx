@@ -9,7 +9,7 @@ import LyricsSelection from "../components/LyricsSelection.jsx";
 import YoutubeContainer from "../components/YoutubeContainer.jsx";
 import { youtubeStateChange } from "../utils/youtubeStateChange.js";
 import { getYoutubeEmbedUrl } from "../utils/getYoutubeEmbedUrl.js";
-import { MdKeyboardBackspace } from "react-icons/md";
+import { MdKeyboardArrowUp, MdKeyboardBackspace } from "react-icons/md";
 
 const VtuberSongDetailsPage = ({ vtubers }) => {
   const [song, setSong] = useState({});
@@ -21,6 +21,7 @@ const VtuberSongDetailsPage = ({ vtubers }) => {
   const [activeLyrics, setActiveLyrics] = useState("lyrics");
   const lyricsContainerRef = useRef(null);
   const navigate = useNavigate();
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   // Fetch song
   useEffect(() => {
@@ -46,25 +47,28 @@ const VtuberSongDetailsPage = ({ vtubers }) => {
     }
   }, [id, songId, vtubers]);
 
-  // Load YouTube iframe API
+  // Set embed URL when song changes
+  useEffect(() => {
+    if (!song?.videoUrl) return;
+    setEmbedUrl(getYoutubeEmbedUrl(song.videoUrl));
+  }, [song]);
+
+  // Load YouTube iframe API and create player (runs when embedUrl + song are ready)
   useEffect(() => {
     if (
       !song ||
       !song.lyrics ||
       !song.timestamps ||
+      !embedUrl ||
       !lyricsContainerRef.current
     )
       return;
 
-    setEmbedUrl(getYoutubeEmbedUrl(song.videoUrl));
-
-    const tag = document.createElement("script");
-    tag.src = "https://www.youtube.com/iframe_api";
-    const firstScriptTag = document.getElementsByTagName("script")[0];
-    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
     let player, intervalId;
-    window.onYouTubeIframeAPIReady = () => {
+
+    const initPlayer = () => {
+      const el = document.getElementById("youtube-player");
+      if (!el) return;
       player = new YT.Player("youtube-player", {
         events: {
           onStateChange: (event) =>
@@ -73,18 +77,43 @@ const VtuberSongDetailsPage = ({ vtubers }) => {
               event,
               song,
               lyricsContainerRef,
-              intervalId
+              intervalId,
             )),
         },
       });
     };
+
+    if (window.YT && window.YT.Player) {
+      initPlayer();
+    } else {
+      window.onYouTubeIframeAPIReady = () => {
+        initPlayer();
+      };
+      if (
+        !document.querySelector(
+          'script[src="https://www.youtube.com/iframe_api"]',
+        )
+      ) {
+        const tag = document.createElement("script");
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName("script")[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      }
+    }
 
     return () => {
       window.onYouTubeIframeAPIReady = null;
       if (intervalId) clearInterval(intervalId);
       if (player) player.destroy();
     };
-  }, [song]);
+  }, [song, embedUrl]);
+
+  useEffect(() => {
+    const onScroll = () => setShowScrollTop(window.scrollY > 260);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
     <div
@@ -148,6 +177,42 @@ const VtuberSongDetailsPage = ({ vtubers }) => {
                   id="youtube-player"
                 />
               )}
+            </div>
+
+            <div className={`edge-screen-actions transition-all duration-800 ${showScrollTop ? "translate-x-0 opacity-100" : "translate-x-76 opacity-0"}`}>
+              <div className="edge-screen-actions__inner">
+                <button
+                  type="button"
+                  className="edge-screen-actions__scroll"
+                  onClick={() =>
+                    window.scrollTo({ top: 0, behavior: "smooth" })
+                  }
+                  aria-label="Scroll to top"
+                >
+                  <MdKeyboardArrowUp
+                    size={50}
+                    color="white"
+                    className="drop-shadow-[0_1px_1px_rgba(0,0,0,0.9)] cursor-pointer hover:-translate-y-1.5 transition-transform duration-200"
+                  />
+                </button>
+
+                <button
+                  type="button"
+                  className="edge-screen-actions__return"
+                  onClick={() => navigate(-1)}
+                >
+                  <div className="group flex gap-2">
+                    <MdKeyboardBackspace
+                      size={22}
+                      color="white"
+                      className="drop-shadow-[0_1px_1px_rgba(0,0,0,0.9)] group-hover:-translate-x-1.5 transition-transform duration-200"
+                    />
+                    <span className="font-semibold italic tracking-widest text-white text-shadow-xs text-shadow-black cursor-pointer group-hover:-translate-x-1.5 transition-transform duration-200">
+                      Return to song selection
+                    </span>
+                  </div>
+                </button>
+              </div>
             </div>
           </div>
         )

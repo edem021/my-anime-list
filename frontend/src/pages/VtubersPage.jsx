@@ -3,6 +3,7 @@ import { FaYoutube } from "react-icons/fa";
 import { FaSquareXTwitter } from "react-icons/fa6";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { getProxiedImageUrl } from "../utils/getProxiedImageUrl";
 
 const VtubersPage = () => {
   const [vtubers, setVtubers] = useState([]);
@@ -34,7 +35,7 @@ const VtubersPage = () => {
       <h2 className="text-4xl font-bold border-b border-base-content pb-2">
         Vtubers
       </h2>
-      
+
       <div className="flex flex-col gap-5">
         {vtubers?.map((vtuber) => (
           <div
@@ -46,9 +47,9 @@ const VtubersPage = () => {
               className="flex items-center gap-3 flex-1"
             >
               <img
-                src={vtuber.profileImage}
+                src={getProxiedImageUrl(vtuber.profileImage)}
                 alt={vtuber.name}
-                className="w-16 h-16 rounded-full"
+                className="w-16 h-16 rounded-full object-cover"
               />
               <h2 className="text-xl">{vtuber.name}</h2>
             </Link>

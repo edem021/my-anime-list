@@ -4,16 +4,15 @@ import { Link, useParams } from "react-router-dom";
 import Loading from "../components/Loading.jsx";
 import { FaYoutube } from "react-icons/fa";
 import { FaSquareXTwitter } from "react-icons/fa6";
-import { MdFavoriteBorder } from "react-icons/md";
-import { MdFavorite } from "react-icons/md";
-import { motion } from "framer-motion";
 import Colorthief from "colorthief";
 import VtuberProfilePicture from "../components/VtuberProfilePicture.jsx";
-import { TbEdit } from "react-icons/tb";
 import EditSongModal from "../components/form_components/edit_song_modal/EditSongModal.jsx";
+import VtuberSong from "../components/VtuberSong.jsx";
 
 const VtuberSongsPage = ({ vtubers }) => {
   const [vtuber, setVtuber] = useState([]);
+  const [originalSongs, setOriginalSongs] = useState([]);
+  const [coverSongs, setCoverSongs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [favorites, setFavorites] = useState([]);
   const [colorPalette, setColorPalette] = useState(null);
@@ -48,7 +47,7 @@ const VtuberSongsPage = ({ vtubers }) => {
   useEffect(() => {
     if (vtuber.profileImage) {
       const imageUrl = `http://localhost:5000/api/vtuber/proxy-image/${encodeURIComponent(
-        vtuber.profileImage
+        vtuber.profileImage,
       )}`;
       const img = new Image();
       img.crossOrigin = "Anonymous";
@@ -73,6 +72,14 @@ const VtuberSongsPage = ({ vtubers }) => {
     }
   }, [vtuber.profileImage]);
 
+  // Extract original and cover songs
+  useEffect(() => {
+    if (vtuber.songs) {
+      setOriginalSongs(vtuber.songs.filter((song) => song.original));
+      setCoverSongs(vtuber.songs.filter((song) => !song.original));
+    }
+  }, [vtuber.songs]);
+
   // Toggle favorite
   const toggleFavorite = async (songId) => {
     setFavorites((prev) => ({
@@ -92,15 +99,26 @@ const VtuberSongsPage = ({ vtubers }) => {
         colorPalette && (
           <div className="pl-2">
             <div className="flex items-center gap-10">
-              <VtuberProfilePicture vtuber={vtuber} colorPalette={colorPalette} />
+              <VtuberProfilePicture
+                vtuber={vtuber}
+                colorPalette={colorPalette}
+              />
               <div className="border-b border-base-content pb-2 flex justify-between w-full z-20">
                 <h2 className="text-4xl font-bold">{vtuber.name}</h2>
                 <div className="flex items-center gap-3">
-                  <Link to={vtuber.youtubeChannel} target="_blank" className="relative">
+                  <Link
+                    to={vtuber.youtubeChannel}
+                    target="_blank"
+                    className="relative"
+                  >
                     <FaYoutube size={35} color="red" />
                     <span className="absolute top-2 left-2 w-[50%] h-[50%] bg-white -z-10" />
                   </Link>
-                  <Link to={vtuber.twitter} target="_blank" className="relative">
+                  <Link
+                    to={vtuber.twitter}
+                    target="_blank"
+                    className="relative"
+                  >
                     <FaSquareXTwitter size={32} color="black" />
                     <span className="absolute top-1 left-1 w-[75%] h-[75%] bg-white -z-10" />
                   </Link>
@@ -109,52 +127,35 @@ const VtuberSongsPage = ({ vtubers }) => {
             </div>
 
             <div className="flex flex-col gap-5 ml-45 select-none">
-              {vtuber.songs?.map((song) => (
-                <div
-                  key={song._id}
-                  className="flex justify-end border-dashed border-b border-base-content hover:bg-base-200/70 transition-colors duration-200"
-                >
-                  <Link to={`song/${song._id}`} className="flex-1">
-                    <div className="flex items-center gap-5 ">
-                      <img
-                        src={song.coverImage}
-                        alt={song.title}
-                        className="w-50 rounded"
-                      />
-                      <div className="flex flex-col">
-                        <h2 className="text-xl">{song.title}</h2>
-                        <h3 className="text-sm font-semibold text-base-content/70">
-                          {song.originalTitle}
-                        </h3>
-                      </div>
-                    </div>
-                  </Link>
+              <h4 className="text-2xl mb-5 border-b border-base-content/80 pb-2">Original Songs</h4>
+              {originalSongs.length > 0 ? (
+                originalSongs.map((song) => (
+                  <VtuberSong
+                    key={song._id}
+                    song={song}
+                    toggleFavorite={toggleFavorite}
+                    setShowEditSongModal={setShowEditSongModal}
+                    favorites={favorites}
+                  />
+                ))
+              ) : (
+                <h3 className="error-msg">No original songs yet...</h3>
+              )}
 
-                  <div className="flex items-center mr-5 gap-1.5">
-                    <motion.div
-                      className="bg-base-content/50 p-1 rounded-full cursor-pointer"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={() => setShowEditSongModal({ open: true, song: song })}
-                    >
-                      <TbEdit size={30} color="white" />
-                    </motion.div>
-
-                    <motion.div
-                      className="bg-base-content/50 p-1 rounded-full cursor-pointer"
-                      onClick={() => toggleFavorite(song._id)}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.9 }}
-                    >
-                      {favorites[song._id] ? (
-                        <MdFavorite size={30} color="red" />
-                      ) : (
-                        <MdFavoriteBorder size={30} color="white" />
-                      )}
-                    </motion.div>
-                  </div>
-                </div>
-              ))}
+              <h4 className="text-2xl my-5 border-b border-base-content/80 pb-2">Cover Songs</h4>
+              {coverSongs.length > 0 ? (
+                coverSongs.map((song) => (
+                  <VtuberSong
+                    key={song._id}
+                    song={song}
+                    toggleFavorite={toggleFavorite}
+                    setShowEditSongModal={setShowEditSongModal}
+                    favorites={favorites}
+                  />
+                ))
+              ) : (
+                <h3 className="error-msg">No cover songs yet...</h3>
+              )}
             </div>
           </div>
         )

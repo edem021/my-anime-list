@@ -19,6 +19,7 @@ const router = express.Router();
 router.post("/", createVtuber);
 router.get("/", getVtubers);
 router.get("/youtube-search", youtubeSearch);
+router.get("/proxy-image/:encodedUrl", proxyImage);
 
 router.post("/song", createSongForVtuber);
 
@@ -30,7 +31,6 @@ router.get("/:id/song/:songId", getSongByIdForVtuber);
 router.put("/:id/song/:songId", updateSongForVtuber);
 router.delete("/:id/song/:songId", deleteSongForVtuber);
 
-router.get("/proxy-image/:encodedUrl", proxyImage);
 router.get("/update-profile-picture/:id", updateProfilePicture);
 
 export default router;
