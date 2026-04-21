@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import logo from "../assets/my-al-logo.png";
+import logo from "../assets/suisei-mic.png";
 import { FaSearch } from "react-icons/fa";
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -9,12 +9,12 @@ const Header = () => {
 
   return (
     <header className="header">
-      <div className="h-12 relative">
+      <div className="h-20 pt-2">
         <Link to="/">
-          <img src={logo} alt="MyAl-logo" className="h-full" />
+          <img src={logo} alt="suisei-logo" className="h-full" />
         </Link>
-        <span className="absolute inset-0 bg-base-content -z-10 -translate-0.5 rounded" />
       </div>
+
       <div className="px-4 py-1 rounded-md flex justify-between items-center gap-2 bg-base-100 w-100 h-10 shadow-2xs shadow-black">
         <input
           type="text"
@@ -25,6 +25,7 @@ const Header = () => {
         />
         <FaSearch size={18} className="cursor-pointer text-neutral-content" />
       </div>
+
       <div className="flex gap-4">
         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
           <Link to="/create" className="header-btn">

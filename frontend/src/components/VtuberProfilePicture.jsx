@@ -25,7 +25,7 @@ const VtuberProfilePicture = ({ vtuber, colorPalette }) => {
         style={{
           background: `linear-gradient(120deg, ${colorPalette.first}, ${colorPalette.second})`,
         }}
-        onClick={() => navigate(-1)}
+        onClick={() => navigate("/vtuber")}
       >
         <div className="absolute bg-base-300 w-[200%] h-[200%] rounded-full top-[2%] left-[2%] " />
       </div>

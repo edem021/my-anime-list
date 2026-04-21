@@ -108,6 +108,7 @@ const VtuberSongDetailsPage = ({ vtubers }) => {
     };
   }, [song, embedUrl]);
 
+  // Show scroll to top button when user scrolls down
   useEffect(() => {
     const onScroll = () => setShowScrollTop(window.scrollY > 260);
     onScroll();
