@@ -57,6 +57,42 @@ body {
   @apply text-lg text-error font-semibold italic;
 }
 
+.section-kv {
+  @apply relative grid min-h-[80vh] place-items-center p-6;
+}
+
+.kv {
+  @apply pointer-events-none absolute inset-0 grid place-items-center;
+}
+
+.kv img {
+  @apply select-none;
+  width: min(90vw, 850px);
+  aspect-ratio: 1174 / 1150;
+  object-fit: contain;
+}
+
+.kv__outer1,
+.kv__outer2 {
+  @apply absolute grid place-items-center;
+}
+
+.kv__outer1 {
+  mask: radial-gradient(transparent 65%, #000 0, #000 100%);
+}
+
+.kv__outer2 {
+  mask: radial-gradient(#000 0, #000 62%, transparent 68%, transparent 100%);
+}
+
+.kv__outer1 > div {
+  animation: 42s kvSpinClockwise linear infinite;
+}
+
+.kv__outer2 > div {
+  animation: 56s kvSpinCounter linear infinite;
+}
+
 /* Flush to viewport right: flat edge = screen edge; left side rounded (half-pill).
    Small “shoulder” tab for scroll sits above the back bar on the right — see sketch. */
 .edge-screen-actions {
@@ -120,5 +156,31 @@ input:-webkit-autofill:active {
   100% {
     --conic-angle: 360deg;
     box-shadow: 0 0 15px var(--glow-color);
+  }
+}
+
+@keyframes kvSpinClockwise {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes kvSpinCounter {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kv__outer1 > div,
+  .kv__outer2 > div,
+  .kv__outer3 > div {
+    animation: none;
   }
 }
